@@ -6,95 +6,56 @@ const WHATSAPP_NUMBER = '994554750060'
 
 const translations = {
   ru: {
-    nav: ['Главная', 'Услуги', 'Работы', 'О нас', 'Карта', 'Контакты'],
-    heroEyebrow: 'PREMIUM AUTO SERVICE · BAKU',
-    heroTitle: ['Машина должна', 'выглядеть', 'идеально.'],
-    heroText:
-      'Профессиональный детейлинг, полировка и уход за автомобилем в Баку. Работаем с вниманием к каждой детали.',
-    book: 'Записаться на сервис →',
-    works: 'Смотреть работы',
-    servicesEyebrow: 'ЧТО МЫ ДЕЛАЕМ',
-    servicesTitle: ['Уход за автомобилем', 'на другом уровне.'],
-    worksEyebrow: 'НАШИ РАБОТЫ',
-    worksTitle: ['Результат,', 'который видно.'],
-    aboutEyebrow: 'AUREN AUTO LAB',
-    aboutTitle: ['Мы не просто', 'моем машины.'],
-    locationEyebrow: 'ГДЕ МЫ',
-    locationTitle: ['Найдите нас', 'в Баку.'],
-    contactEyebrow: 'КОНТАКТЫ',
-    contactTitle: ['Вернём вашему', 'автомобилю блеск.'],
-    calculator: 'Рассчитать стоимость',
-    ai: 'AUREN AI',
-    admin: 'Demo Admin',
+    home: 'Главная',
+    services: 'Услуги',
+    works: 'Работы',
+    about: 'О нас',
+    location: 'Карта',
+    contacts: 'Контакты',
+    book: 'Записаться',
   },
 
   az: {
-    nav: ['Ana səhifə', 'Xidmətlər', 'İşlər', 'Haqqımızda', 'Xəritə', 'Əlaqə'],
-    heroEyebrow: 'PREMIUM AUTO SERVICE · BAKU',
-    heroTitle: ['Avtomobiliniz', 'ideal', 'görünməlidir.'],
-    heroText:
-      'Bakıda peşəkar detailing, cilalama və avtomobil baxımı. Hər detala xüsusi diqqət.',
-    book: 'Servisə yazıl →',
-    works: 'İşlərə bax',
-    servicesEyebrow: 'NƏ EDİRİK',
-    servicesTitle: ['Avtomobil baxımı', 'yeni səviyyədə.'],
-    worksEyebrow: 'İŞLƏRİMİZ',
-    worksTitle: ['Nəticə,', 'göz qabağındadır.'],
-    aboutEyebrow: 'AUREN AUTO LAB',
-    aboutTitle: ['Biz sadəcə', 'maşın yumuruq.'],
-    locationEyebrow: 'BİZ HARADAYIQ',
-    locationTitle: ['Bizi tapın', 'Bakıda.'],
-    contactEyebrow: 'ƏLAQƏ',
-    contactTitle: ['Avtomobilinizə', 'yenidən parlaqlıq verək.'],
-    calculator: 'Qiyməti hesabla',
-    ai: 'AUREN AI',
-    admin: 'Demo Admin',
+    home: 'Ana səhifə',
+    services: 'Xidmətlər',
+    works: 'İşlər',
+    about: 'Haqqımızda',
+    location: 'Xəritə',
+    contacts: 'Əlaqə',
+    book: 'Yazılmaq',
   },
 
   en: {
-    nav: ['Home', 'Services', 'Works', 'About', 'Map', 'Contact'],
-    heroEyebrow: 'PREMIUM AUTO SERVICE · BAKU',
-    heroTitle: ['Your car.', 'Perfected.', ''],
-    heroText:
-      'Premium detailing, paint correction and automotive care in Baku. Attention to every detail.',
-    book: 'Book a service →',
-    works: 'View our work',
-    servicesEyebrow: 'WHAT WE DO',
-    servicesTitle: ['Automotive care', 'at another level.'],
-    worksEyebrow: 'OUR WORK',
-    worksTitle: ['Results', 'you can see.'],
-    aboutEyebrow: 'AUREN AUTO LAB',
-    aboutTitle: ['We do more', 'than wash cars.'],
-    locationEyebrow: 'WHERE WE ARE',
-    locationTitle: ['Find us', 'in Baku.'],
-    contactEyebrow: 'CONTACT',
-    contactTitle: ['Bring back', 'your car’s shine.'],
-    calculator: 'Calculate price',
-    ai: 'AUREN AI',
-    admin: 'Demo Admin',
+    home: 'Home',
+    services: 'Services',
+    works: 'Works',
+    about: 'About',
+    location: 'Map',
+    contacts: 'Contact',
+    book: 'Book now',
   },
 }
 
 const services = [
   {
     number: '01',
-    key: 'detailing',
     title: 'Детейлинг',
-    description: 'Глубокая очистка салона и кузова.',
+    description:
+      'Глубокая очистка салона и кузова с использованием профессиональной химии.',
     price: 150,
   },
   {
     number: '02',
-    key: 'polishing',
     title: 'Полировка',
-    description: 'Восстановление блеска и устранение мелких дефектов.',
+    description:
+      'Восстановление блеска кузова и устранение мелких дефектов.',
     price: 250,
   },
   {
     number: '03',
-    key: 'ceramic',
     title: 'Керамика',
-    description: 'Защитное покрытие кузова с гидрофобным эффектом.',
+    description:
+      'Защитное покрытие кузова с гидрофобным эффектом.',
     price: 400,
   },
 ]
@@ -130,23 +91,23 @@ const works = [
     category: 'Full Refresh',
     image: porscheImg,
     description:
-      'Полное визуальное восстановление.',
+      'Полное визуальное восстановление автомобиля.',
   },
 ]
 
 function getPage() {
   const hash = window.location.hash.replace('#', '')
 
-  return [
+  const pages = [
     'services',
     'works',
     'about',
     'location',
     'contact',
     'admin',
-  ].includes(hash)
-    ? hash
-    : 'home'
+  ]
+
+  return pages.includes(hash) ? hash : 'home'
 }
 
 function App() {
@@ -154,13 +115,20 @@ function App() {
   const [theme, setTheme] = useState('dark')
   const [page, setPage] = useState(getPage())
   const [loading, setLoading] = useState(true)
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState(1)
 
-  const [selectedWork, setSelectedWork] = useState(null)
   const [calculatorOpen, setCalculatorOpen] = useState(false)
+
+  const [selectedWork, setSelectedWork] = useState(null)
+  const [comparison, setComparison] = useState(50)
+
+  // =========================
+  // REAL AI STATE
+  // =========================
 
   const [aiOpen, setAiOpen] = useState(false)
   const [aiQuestion, setAiQuestion] = useState('')
@@ -170,11 +138,13 @@ function App() {
     {
       role: 'assistant',
       content:
-        'Здравствуйте! Я AUREN AI — автомобильный ассистент. Можете спрашивать меня о двигателях, коробках, надёжности, обслуживании, тюнинге, сравнении автомобилей и практически обо всём, что связано с машинами.',
+        'Здравствуйте! Я AUREN AI — автомобильный AI-ассистент. Спрашивайте о любых автомобилях, двигателях, коробках, обслуживании, надёжности, тюнинге, покупке машины и сравнении моделей.',
     },
   ])
 
-  const [comparison, setComparison] = useState(50)
+  // =========================
+  // BOOKING STATE
+  // =========================
 
   const [form, setForm] = useState({
     name: '',
@@ -190,18 +160,25 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 900)
+    }, 800)
 
-    const handleHash = () => {
+    const handleHashChange = () => {
       setPage(getPage())
       setMobileMenuOpen(false)
     }
 
-    window.addEventListener('hashchange', handleHash)
+    window.addEventListener(
+      'hashchange',
+      handleHashChange,
+    )
 
     return () => {
       clearTimeout(timer)
-      window.removeEventListener('hashchange', handleHash)
+
+      window.removeEventListener(
+        'hashchange',
+        handleHashChange,
+      )
     }
   }, [])
 
@@ -214,41 +191,51 @@ function App() {
       (item) => item.title === form.service,
     )
 
-    const multipliers = {
+    const multiplier = {
       Маленький: 0.85,
       Средний: 1,
       Большой: 1.25,
-    }
+    }[form.size]
 
     return Math.round(
-      (service?.price || 150) * multipliers[form.size],
+      (service?.price || 150) * multiplier,
     )
   }, [form.service, form.size])
 
+  // =========================
+  // NAVIGATION
+  // =========================
+
   const navigate = (target) => {
-    window.location.hash = target === 'home' ? '' : target
+    window.location.hash =
+      target === 'home' ? '' : target
+
     setPage(target)
     setMobileMenuOpen(false)
   }
 
+  // =========================
+  // BOOKING
+  // =========================
+
   const openBooking = () => {
     setBookingStep(1)
-    setIsBookingOpen(true)
+    setBookingOpen(true)
     setMobileMenuOpen(false)
   }
 
   const closeBooking = () => {
-    setIsBookingOpen(false)
+    setBookingOpen(false)
     setBookingStep(1)
   }
 
-  const nextBookingStep = () => {
+  const nextStep = () => {
     if (bookingStep < 4) {
       setBookingStep((value) => value + 1)
     }
   }
 
-  const previousBookingStep = () => {
+  const previousStep = () => {
     if (bookingStep > 1) {
       setBookingStep((value) => value - 1)
     }
@@ -263,9 +250,7 @@ function App() {
     }))
   }
 
-  const submitBooking = (event) => {
-    event.preventDefault()
-
+  const sendBooking = () => {
     const message = [
       'Здравствуйте! Хочу записаться в AUREN AUTO LAB.',
       '',
@@ -274,56 +259,83 @@ function App() {
       `Автомобиль: ${form.car}`,
       `Услуга: ${form.service}`,
       `Размер: ${form.size}`,
-      `Желаемая дата: ${form.date}`,
+      `Дата: ${form.date}`,
       `Ориентировочная стоимость: ${price} ₼`,
     ].join('\n')
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      message,
-    )}`
+    const url =
+      `https://wa.me/${WHATSAPP_NUMBER}` +
+      `?text=${encodeURIComponent(message)}`
 
-    window.open(url, '_blank', 'noopener,noreferrer')
+    window.open(
+      url,
+      '_blank',
+      'noopener,noreferrer',
+    )
 
     closeBooking()
   }
 
-  /*
-   * REAL AI
-   */
+  // =========================
+  // REAL AI
+  // =========================
+
   const askAI = async (customQuestion = '') => {
     const question = (
       customQuestion || aiQuestion
     ).trim()
 
-    if (!question || aiLoading) return
+    if (!question || aiLoading) {
+      return
+    }
 
     const userMessage = {
       role: 'user',
       content: question,
     }
 
-    const nextMessages = [...aiMessages, userMessage]
+    const nextMessages = [
+      ...aiMessages,
+      userMessage,
+    ]
 
+    // Immediately show user message
     setAiMessages(nextMessages)
     setAiQuestion('')
     setAiLoading(true)
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        '/api/chat',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json',
+          },
+
+          body: JSON.stringify({
+            messages: nextMessages,
+          }),
         },
-        body: JSON.stringify({
-          messages: nextMessages,
-        }),
-      })
+      )
 
       const data = await response.json()
 
       if (!response.ok) {
         throw new Error(
-          data?.error || 'AI request failed',
+          data?.error ||
+            'AI request failed',
+        )
+      }
+
+      const answer =
+        data?.answer?.trim()
+
+      if (!answer) {
+        throw new Error(
+          'Empty AI response',
         )
       }
 
@@ -331,26 +343,31 @@ function App() {
         ...previous,
         {
           role: 'assistant',
-          content:
-            data.answer ||
-            'Модель не вернула текстовый ответ.',
+          content: answer,
         },
       ])
     } catch (error) {
-      console.error('AUREN AI:', error)
+      console.error(
+        'AUREN AI:',
+        error,
+      )
 
       setAiMessages((previous) => [
         ...previous,
         {
           role: 'assistant',
           content:
-            'Не удалось получить ответ от AUREN AI. Проверьте подключение API и попробуйте ещё раз.',
+            'Не удалось получить ответ от AUREN AI. Попробуйте ещё раз.',
         },
       ])
     } finally {
       setAiLoading(false)
     }
   }
+
+  // =========================
+  // LOADING
+  // =========================
 
   if (loading) {
     return (
@@ -363,201 +380,261 @@ function App() {
           <div></div>
         </div>
 
-        <p>LOADING EXPERIENCE...</p>
+        <p>
+          LOADING EXPERIENCE...
+        </p>
       </div>
     )
   }
 
   return (
     <div className="site">
+
+      {/* ================= HEADER ================= */}
+
       <header className="header">
+
         <button
           className="brand"
-          onClick={() => navigate('home')}
+          onClick={() =>
+            navigate('home')
+          }
         >
           <span>AUREN</span> AUTO LAB
         </button>
 
         <nav className="desktop-nav">
-          <button onClick={() => navigate('home')}>
-            {t.nav[0]}
+
+          <button
+            onClick={() =>
+              navigate('home')
+            }
+          >
+            {t.home}
           </button>
 
-          <button onClick={() => navigate('services')}>
-            {t.nav[1]}
+          <button
+            onClick={() =>
+              navigate('services')
+            }
+          >
+            {t.services}
           </button>
 
-          <button onClick={() => navigate('works')}>
-            {t.nav[2]}
+          <button
+            onClick={() =>
+              navigate('works')
+            }
+          >
+            {t.works}
           </button>
 
-          <button onClick={() => navigate('about')}>
-            {t.nav[3]}
+          <button
+            onClick={() =>
+              navigate('about')
+            }
+          >
+            {t.about}
           </button>
 
-          <button onClick={() => navigate('location')}>
-            {t.nav[4]}
+          <button
+            onClick={() =>
+              navigate('location')
+            }
+          >
+            {t.location}
           </button>
 
-          <button onClick={() => navigate('contact')}>
-            {t.nav[5]}
+          <button
+            onClick={() =>
+              navigate('contact')
+            }
+          >
+            {t.contacts}
           </button>
+
         </nav>
 
         <div className="header-actions">
+
           <div className="language-switcher">
-            {['ru', 'az', 'en'].map((item) => (
-              <button
-                key={item}
-                className={
-                  language === item ? 'active' : ''
-                }
-                onClick={() => setLanguage(item)}
-              >
-                {item.toUpperCase()}
-              </button>
-            ))}
+
+            {['ru', 'az', 'en'].map(
+              (item) => (
+                <button
+                  key={item}
+                  className={
+                    language === item
+                      ? 'active'
+                      : ''
+                  }
+                  onClick={() =>
+                    setLanguage(item)
+                  }
+                >
+                  {item.toUpperCase()}
+                </button>
+              ),
+            )}
+
           </div>
 
           <button
             className="theme-button"
             onClick={() =>
-              setTheme((value) =>
-                value === 'dark' ? 'light' : 'dark',
+              setTheme(
+                theme === 'dark'
+                  ? 'light'
+                  : 'dark',
               )
             }
           >
-            {theme === 'dark' ? '☼' : '☾'}
+            {theme === 'dark'
+              ? '☼'
+              : '☾'}
           </button>
 
           <button
-            className="primary-button header-booking"
+            className="primary-button"
             onClick={openBooking}
           >
             {t.book}
           </button>
+
         </div>
 
         <button
-          className={`menu-button ${
-            mobileMenuOpen ? 'active' : ''
-          }`}
+          className="menu-button"
           onClick={() =>
-            setMobileMenuOpen((value) => !value)
+            setMobileMenuOpen(
+              (value) => !value,
+            )
           }
-          aria-label="Открыть меню"
         >
           <span></span>
           <span></span>
           <span></span>
         </button>
+
       </header>
+
+      {/* ================= MOBILE MENU ================= */}
 
       {mobileMenuOpen && (
         <div className="mobile-menu">
-          <button onClick={() => navigate('home')}>
-            {t.nav[0]}
+
+          <button
+            onClick={() =>
+              navigate('home')
+            }
+          >
+            {t.home}
           </button>
 
-          <button onClick={() => navigate('services')}>
-            {t.nav[1]}
+          <button
+            onClick={() =>
+              navigate('services')
+            }
+          >
+            {t.services}
           </button>
 
-          <button onClick={() => navigate('works')}>
-            {t.nav[2]}
+          <button
+            onClick={() =>
+              navigate('works')
+            }
+          >
+            {t.works}
           </button>
 
-          <button onClick={() => navigate('about')}>
-            {t.nav[3]}
+          <button
+            onClick={() =>
+              navigate('about')
+            }
+          >
+            {t.about}
           </button>
 
-          <button onClick={() => navigate('location')}>
-            {t.nav[4]}
+          <button
+            onClick={() =>
+              navigate('location')
+            }
+          >
+            {t.location}
           </button>
 
-          <button onClick={() => navigate('contact')}>
-            {t.nav[5]}
+          <button
+            onClick={() =>
+              navigate('contact')
+            }
+          >
+            {t.contacts}
           </button>
 
-          <div className="mobile-actions">
-            <div className="language-switcher">
-              {['ru', 'az', 'en'].map((item) => (
-                <button
-                  key={item}
-                  className={
-                    language === item ? 'active' : ''
-                  }
-                  onClick={() => setLanguage(item)}
-                >
-                  {item.toUpperCase()}
-                </button>
-              ))}
-            </div>
+          <button
+            className="primary-button"
+            onClick={openBooking}
+          >
+            {t.book}
+          </button>
 
-            <button
-              className="theme-button"
-              onClick={() =>
-                setTheme((value) =>
-                  value === 'dark'
-                    ? 'light'
-                    : 'dark',
-                )
-              }
-            >
-              {theme === 'dark'
-                ? '☼ Светлая'
-                : '☾ Тёмная'}
-            </button>
-
-            <button
-              className="primary-button"
-              onClick={openBooking}
-            >
-              {t.book}
-            </button>
-          </div>
         </div>
       )}
 
       <main>
+
+        {/* ================= HOME ================= */}
+
         {page === 'home' && (
           <>
+
             <section className="hero">
-              <div className="hero-content reveal">
+
+              <div className="hero-content">
+
                 <p className="eyebrow">
-                  {t.heroEyebrow}
+                  PREMIUM AUTO SERVICE · BAKU
                 </p>
 
                 <h1>
-                  {t.heroTitle[0]}
+                  Машина должна
                   <br />
-                  {t.heroTitle[1]}
+                  выглядеть
                   <br />
-                  <span>{t.heroTitle[2]}</span>
+                  <span>идеально.</span>
                 </h1>
 
                 <p className="hero-description">
-                  {t.heroText}
+                  Профессиональный детейлинг,
+                  полировка и уход за автомобилем
+                  в Баку. Работаем с вниманием
+                  к каждой детали.
                 </p>
 
                 <div className="hero-buttons">
+
                   <button
                     className="primary-button"
                     onClick={openBooking}
                   >
-                    {t.book}
+                    {t.book} →
                   </button>
 
                   <button
                     className="secondary-button"
-                    onClick={() => navigate('works')}
+                    onClick={() =>
+                      navigate('works')
+                    }
                   >
-                    {t.works}
+                    Смотреть работы
                   </button>
+
                 </div>
+
               </div>
 
-              <div className="hero-visual reveal reveal-delay">
+              <div className="hero-visual">
+
                 <div className="glow"></div>
 
                 <div className="car-image-wrapper">
@@ -568,55 +645,174 @@ function App() {
                 </div>
 
                 <div className="visual-label">
-                  <span>AUREN AUTO LAB</span>
+                  <span>
+                    AUREN AUTO LAB
+                  </span>
                   <strong>01</strong>
                 </div>
+
               </div>
+
             </section>
 
             <section className="showcase-strip">
+
               <div>
                 <span>PREMIUM</span>
-                <small>Automotive care</small>
+                <small>
+                  Automotive care
+                </small>
               </div>
 
               <div>
                 <span>BAKU</span>
-                <small>Azərbaycan</small>
+                <small>
+                  Azərbaycan
+                </small>
               </div>
 
               <div>
                 <span>24/7</span>
-                <small>Online bookings</small>
+                <small>
+                  Online bookings
+                </small>
               </div>
+
             </section>
 
             <section className="preview-section">
+
               <div className="section-heading">
+
                 <p className="eyebrow">
-                  {t.servicesEyebrow}
+                  ЧТО МЫ ДЕЛАЕМ
                 </p>
 
                 <h2>
-                  {t.servicesTitle[0]}
+                  Уход за автомобилем
                   <br />
-                  {t.servicesTitle[1]}
+                  на другом уровне.
                 </h2>
+
               </div>
 
               <div className="service-grid">
-                {services.map((service) => (
+
+                {services.map(
+                  (service) => (
+                    <article
+                      className="service-card"
+                      key={service.number}
+                    >
+
+                      <span className="service-number">
+                        {service.number}
+                      </span>
+
+                      <h3>
+                        {service.title}
+                      </h3>
+
+                      <p>
+                        {service.description}
+                      </p>
+
+                      <strong>
+                        от {service.price} ₼
+                      </strong>
+
+                      <button
+                        className="card-button"
+                        onClick={() => {
+                          setForm(
+                            (previous) => ({
+                              ...previous,
+                              service:
+                                service.title,
+                            }),
+                          )
+
+                          setCalculatorOpen(
+                            true,
+                          )
+                        }}
+                      >
+                        Рассчитать стоимость →
+                      </button>
+
+                    </article>
+                  ),
+                )}
+
+              </div>
+
+            </section>
+
+            {/* REAL AI BANNER */}
+
+            <section className="ai-banner">
+
+              <div>
+
+                <span>
+                  AUREN AI
+                </span>
+
+                <h2>
+                  Ваш персональный
+                  <br />
+                  автоконсультант.
+                </h2>
+
+              </div>
+
+              <button
+                className="primary-button"
+                onClick={() =>
+                  setAiOpen(true)
+                }
+              >
+                Открыть AI →
+              </button>
+
+            </section>
+
+          </>
+        )}
+
+        {/* ================= SERVICES ================= */}
+
+        {page === 'services' && (
+          <section className="page-section">
+
+            <p className="eyebrow">
+              SERVICES
+            </p>
+
+            <h1 className="page-title">
+              Услуги и стоимость
+            </h1>
+
+            <div className="service-grid">
+
+              {services.map(
+                (service) => (
                   <article
                     className="service-card"
                     key={service.number}
                   >
+
                     <span className="service-number">
                       {service.number}
                     </span>
 
-                    <h3>{service.title}</h3>
+                    <h3>
+                      {service.title}
+                    </h3>
 
-                    <p>{service.description}</p>
+                    <p>
+                      {service.description}
+                    </p>
 
                     <strong>
                       от {service.price} ₼
@@ -625,198 +821,213 @@ function App() {
                     <button
                       className="card-button"
                       onClick={() => {
-                        setForm((previous) => ({
-                          ...previous,
-                          service: service.title,
-                        }))
+                        setForm(
+                          (previous) => ({
+                            ...previous,
+                            service:
+                              service.title,
+                          }),
+                        )
 
-                        setCalculatorOpen(true)
+                        setCalculatorOpen(
+                          true,
+                        )
                       }}
                     >
-                      {t.calculator} →
+                      Рассчитать стоимость →
                     </button>
+
                   </article>
-                ))}
-              </div>
-            </section>
+                ),
+              )}
 
-            <section className="ai-banner">
-              <div>
-                <span>AUREN AI</span>
-
-                <h2>
-                  Ваш персональный
-                  <br />
-                  автоконсультант.
-                </h2>
-              </div>
-
-              <button
-                className="primary-button"
-                onClick={() => setAiOpen(true)}
-              >
-                Открыть AI →
-              </button>
-            </section>
-          </>
-        )}
-
-        {page === 'services' && (
-          <section className="page-section">
-            <p className="eyebrow">SERVICES</p>
-
-            <h1 className="page-title">
-              Услуги и стоимость
-            </h1>
-
-            <div className="service-grid large">
-              {services.map((service) => (
-                <article
-                  className="service-card"
-                  key={service.number}
-                >
-                  <span className="service-number">
-                    {service.number}
-                  </span>
-
-                  <h3>{service.title}</h3>
-
-                  <p>{service.description}</p>
-
-                  <strong>
-                    от {service.price} ₼
-                  </strong>
-
-                  <button
-                    className="card-button"
-                    onClick={() => {
-                      setForm((previous) => ({
-                        ...previous,
-                        service: service.title,
-                      }))
-
-                      setCalculatorOpen(true)
-                    }}
-                  >
-                    {t.calculator} →
-                  </button>
-                </article>
-              ))}
             </div>
+
           </section>
         )}
+
+        {/* ================= WORKS ================= */}
 
         {page === 'works' && (
           <section className="page-section">
+
             <p className="eyebrow">
-              {t.worksEyebrow}
+              НАШИ РАБОТЫ
             </p>
 
             <h1 className="page-title">
-              {t.worksTitle[0]}{' '}
-              {t.worksTitle[1]}
+              Результат,
+              <br />
+              который видно.
             </h1>
 
             <div className="works-grid">
-              {works.map((work) => (
-                <button
-                  className="work-card"
-                  key={work.number}
-                  onClick={() => {
-                    setSelectedWork(work)
-                    setComparison(50)
-                  }}
-                >
-                  <img
-                    src={work.image}
-                    alt={work.title}
-                  />
 
-                  <div className="work-overlay">
-                    <span>{work.number}</span>
+              {works.map(
+                (work) => (
+                  <button
+                    className="work-card"
+                    key={work.number}
+                    onClick={() => {
+                      setSelectedWork(
+                        work,
+                      )
+                      setComparison(50)
+                    }}
+                  >
 
-                    <div>
-                      <h3>{work.title}</h3>
-                      <p>{work.category}</p>
+                    <img
+                      src={work.image}
+                      alt={work.title}
+                    />
+
+                    <div className="work-overlay">
+
+                      <span>
+                        {work.number}
+                      </span>
+
+                      <div>
+                        <h3>
+                          {work.title}
+                        </h3>
+
+                        <p>
+                          {work.category}
+                        </p>
+                      </div>
+
+                      <span>
+                        ↗
+                      </span>
+
                     </div>
 
-                    <span>↗</span>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ),
+              )}
+
             </div>
+
           </section>
         )}
 
+        {/* ================= ABOUT ================= */}
+
         {page === 'about' && (
-          <section className="page-section about-page">
+          <section className="page-section">
+
             <p className="eyebrow">
-              {t.aboutEyebrow}
+              AUREN AUTO LAB
             </p>
 
             <h1 className="page-title">
-              {t.aboutTitle[0]}
+              Мы не просто
               <br />
-              {t.aboutTitle[1]}
+              моем машины.
             </h1>
 
             <div className="about-grid">
+
               <div>
+
                 <p>
-                  AUREN AUTO LAB — демонстрационный
-                  premium automotive проект,
-                  созданный как showcase современного
-                  web-development.
+                  AUREN AUTO LAB —
+                  демонстрационный
+                  premium automotive
+                  project.
                 </p>
 
                 <p>
-                  Проект демонстрирует responsive UI,
-                  локализацию, интерактивные формы,
-                  price calculator, AI assistant,
-                  dashboard и deployment на Vercel.
+                  Этот проект создан как
+                  showcase современного
+                  web-development:
+                  React, responsive UI,
+                  multilingual interface,
+                  booking system,
+                  price calculator,
+                  AI assistant,
+                  dashboard и Vercel.
                 </p>
+
               </div>
 
               <div className="tech-card">
-                <span>BUILT WITH</span>
+
+                <span>
+                  BUILT WITH
+                </span>
 
                 <div className="tech-list">
-                  <strong>React</strong>
-                  <strong>Vite</strong>
-                  <strong>JavaScript</strong>
-                  <strong>CSS</strong>
-                  <strong>Vercel</strong>
-                  <strong>GitHub</strong>
-                  <strong>Groq AI</strong>
+
+                  <strong>
+                    React
+                  </strong>
+
+                  <strong>
+                    Vite
+                  </strong>
+
+                  <strong>
+                    JavaScript
+                  </strong>
+
+                  <strong>
+                    CSS
+                  </strong>
+
+                  <strong>
+                    Vercel
+                  </strong>
+
+                  <strong>
+                    GitHub
+                  </strong>
+
+                  <strong>
+                    Groq AI
+                  </strong>
+
                 </div>
+
               </div>
+
             </div>
+
           </section>
         )}
 
+        {/* ================= LOCATION ================= */}
+
         {page === 'location' && (
           <section className="page-section">
+
             <p className="eyebrow">
-              {t.locationEyebrow}
+              ГДЕ МЫ
             </p>
 
             <h1 className="page-title">
-              {t.locationTitle[0]}
+              Найдите нас
               <br />
-              {t.locationTitle[1]}
+              в <span>Баку.</span>
             </h1>
 
             <div className="location-layout">
+
               <div className="location-info">
-                <span>DEMO LOCATION</span>
+
+                <span>
+                  DEMO LOCATION
+                </span>
 
                 <strong>
                   Babək prospekti · Bakı
                 </strong>
 
                 <p>
-                  Демонстрационная точка для
-                  portfolio project.
+                  Демонстрационная
+                  точка для portfolio
+                  project.
                 </p>
 
                 <a
@@ -827,9 +1038,11 @@ function App() {
                 >
                   Построить маршрут →
                 </a>
+
               </div>
 
               <div className="map-wrapper">
+
                 <iframe
                   title="AUREN AUTO LAB"
                   src="https://www.google.com/maps?q=Babek+prospekti,+Baku&output=embed"
@@ -837,30 +1050,45 @@ function App() {
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
+
               </div>
+
             </div>
+
           </section>
         )}
 
+        {/* ================= CONTACT ================= */}
+
         {page === 'contact' && (
           <section className="page-section">
+
             <p className="eyebrow">
-              {t.contactEyebrow}
+              КОНТАКТЫ
             </p>
 
             <h1 className="page-title">
-              {t.contactTitle[0]}
+              Вернём вашему
               <br />
-              <span>{t.contactTitle[1]}</span>
+              <span>
+                автомобилю блеск.
+              </span>
             </h1>
 
             <div className="contact-grid">
+
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                href={
+                  `https://wa.me/` +
+                  WHATSAPP_NUMBER
+                }
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>WhatsApp</span>
+                <span>
+                  WhatsApp
+                </span>
+
                 <strong>
                   +994 55 475 00 60
                 </strong>
@@ -871,140 +1099,229 @@ function App() {
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>Instagram</span>
+                <span>
+                  Instagram
+                </span>
+
                 <strong>
                   @KASSADnaSviZE
                 </strong>
               </a>
 
               <div>
-                <span>Локация</span>
+                <span>
+                  Локация
+                </span>
+
                 <strong>
                   Babək prospekti · Bakı
                 </strong>
               </div>
 
               <div>
-                <span>График</span>
+                <span>
+                  График
+                </span>
+
                 <strong>
                   Пн–Сб · 09:00–21:00
                 </strong>
               </div>
+
             </div>
 
             <button
               className="primary-button"
               onClick={openBooking}
             >
-              {t.book}
+              {t.book} →
             </button>
+
           </section>
         )}
 
+        {/* ================= ADMIN ================= */}
+
         {page === 'admin' && (
           <section className="admin-page">
+
             <div className="admin-header">
+
               <div>
+
                 <p className="eyebrow">
                   DEMO ADMIN
                 </p>
 
-                <h1>AUREN Dashboard</h1>
+                <h1>
+                  AUREN Dashboard
+                </h1>
+
               </div>
 
               <span className="admin-status">
                 ● LIVE DEMO
               </span>
+
             </div>
 
             <div className="dashboard-cards">
+
               <div>
-                <span>Bookings</span>
-                <strong>24</strong>
+                <span>
+                  Bookings
+                </span>
+
+                <strong>
+                  24
+                </strong>
               </div>
 
               <div>
-                <span>Today</span>
-                <strong>6</strong>
+                <span>
+                  Today
+                </span>
+
+                <strong>
+                  6
+                </strong>
               </div>
 
               <div>
-                <span>Revenue</span>
-                <strong>4 820 ₼</strong>
+                <span>
+                  Revenue
+                </span>
+
+                <strong>
+                  4 820 ₼
+                </strong>
               </div>
 
               <div>
-                <span>Conversion</span>
-                <strong>7.4%</strong>
+                <span>
+                  Conversion
+                </span>
+
+                <strong>
+                  7.4%
+                </strong>
               </div>
+
             </div>
 
             <div className="dashboard-table">
+
               <div className="table-title">
                 Upcoming appointments
               </div>
 
               <div className="table-row">
-                <strong>BMW M5</strong>
-                <span>Полировка</span>
-                <span>10:30</span>
-                <b>Confirmed</b>
+                <strong>
+                  BMW M5
+                </strong>
+
+                <span>
+                  Полировка
+                </span>
+
+                <span>
+                  10:30
+                </span>
+
+                <b>
+                  Confirmed
+                </b>
               </div>
 
               <div className="table-row">
-                <strong>Porsche 911</strong>
-                <span>Керамика</span>
-                <span>14:00</span>
-                <b>Confirmed</b>
+                <strong>
+                  Porsche 911
+                </strong>
+
+                <span>
+                  Керамика
+                </span>
+
+                <span>
+                  14:00
+                </span>
+
+                <b>
+                  Confirmed
+                </b>
               </div>
 
               <div className="table-row">
-                <strong>Mercedes-AMG</strong>
-                <span>Детейлинг</span>
-                <span>17:30</span>
-                <b>Pending</b>
+                <strong>
+                  Mercedes-AMG
+                </strong>
+
+                <span>
+                  Детейлинг
+                </span>
+
+                <span>
+                  17:30
+                </span>
+
+                <b>
+                  Pending
+                </b>
               </div>
+
             </div>
+
           </section>
         )}
+
       </main>
 
+      {/* ================= FOOTER ================= */}
+
       <footer>
+
         <div>
+
           <div className="brand">
-            <span>AUREN</span> AUTO LAB
+            <span>
+              AUREN
+            </span>{' '}
+            AUTO LAB
           </div>
 
           <p>
-            Premium automotive care · Baku,
-            Azerbaijan · Portfolio Demo
+            Premium automotive care ·
+            Baku, Azerbaijan ·
+            Portfolio Demo
           </p>
+
         </div>
 
-        <button onClick={() => navigate('admin')}>
-          {t.admin}
+        <button
+          onClick={() =>
+            navigate('admin')
+          }
+        >
+          Demo Admin
         </button>
+
       </footer>
 
-      <button
-        className="mobile-booking"
-        onClick={openBooking}
-      >
-        {t.book}
-      </button>
+      {/* ================= BOOKING WIZARD ================= */}
 
-      {/* BOOKING */}
-      {isBookingOpen && (
+      {bookingOpen && (
         <div
           className="modal-backdrop"
           onMouseDown={closeBooking}
         >
+
           <div
             className="booking-modal"
             onMouseDown={(event) =>
               event.stopPropagation()
             }
           >
+
             <button
               className="modal-close"
               onClick={closeBooking}
@@ -1013,20 +1330,26 @@ function App() {
             </button>
 
             <p className="eyebrow">
-              BOOKING · STEP {bookingStep}/4
+              BOOKING · STEP{' '}
+              {bookingStep}/4
             </p>
 
             <div className="progress">
+
               <div
                 style={{
-                  width: `${bookingStep * 25}%`,
+                  width:
+                    `${bookingStep * 25}%`,
                 }}
               ></div>
+
             </div>
 
             {bookingStep === 1 && (
               <>
-                <h2>Ваш автомобиль</h2>
+                <h2>
+                  Ваш автомобиль
+                </h2>
 
                 <label>
                   Марка и модель
@@ -1036,7 +1359,6 @@ function App() {
                     value={form.car}
                     onChange={handleChange}
                     placeholder="BMW M5 / Porsche 911"
-                    required
                   />
                 </label>
               </>
@@ -1044,83 +1366,121 @@ function App() {
 
             {bookingStep === 2 && (
               <>
-                <h2>Выберите услугу</h2>
+                <h2>
+                  Выберите услугу
+                </h2>
 
                 <div className="wizard-options">
-                  {services.map((service) => (
-                    <button
-                      className={
-                        form.service === service.title
-                          ? 'selected'
-                          : ''
-                      }
-                      key={service.title}
-                      onClick={() =>
-                        setForm((previous) => ({
-                          ...previous,
-                          service: service.title,
-                        }))
-                      }
-                    >
-                      <span>{service.title}</span>
-                      <b>
-                        от {service.price} ₼
-                      </b>
-                    </button>
-                  ))}
+
+                  {services.map(
+                    (service) => (
+                      <button
+                        key={
+                          service.title
+                        }
+                        className={
+                          form.service ===
+                          service.title
+                            ? 'selected'
+                            : ''
+                        }
+                        onClick={() =>
+                          setForm(
+                            (previous) => ({
+                              ...previous,
+                              service:
+                                service.title,
+                            }),
+                          )
+                        }
+                      >
+                        <span>
+                          {service.title}
+                        </span>
+
+                        <b>
+                          от{' '}
+                          {service.price}{' '}
+                          ₼
+                        </b>
+                      </button>
+                    ),
+                  )}
+
                 </div>
               </>
             )}
 
             {bookingStep === 3 && (
               <>
-                <h2>Размер автомобиля</h2>
+                <h2>
+                  Размер автомобиля
+                </h2>
 
                 <div className="wizard-options">
+
                   {[
                     'Маленький',
                     'Средний',
                     'Большой',
-                  ].map((size) => (
-                    <button
-                      className={
-                        form.size === size
-                          ? 'selected'
-                          : ''
-                      }
-                      key={size}
-                      onClick={() =>
-                        setForm((previous) => ({
-                          ...previous,
-                          size,
-                        }))
-                      }
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  ].map(
+                    (size) => (
+                      <button
+                        key={size}
+                        className={
+                          form.size ===
+                          size
+                            ? 'selected'
+                            : ''
+                        }
+                        onClick={() =>
+                          setForm(
+                            (previous) => ({
+                              ...previous,
+                              size,
+                            }),
+                          )
+                        }
+                      >
+                        {size}
+                      </button>
+                    ),
+                  )}
+
                 </div>
 
                 <div className="estimate">
-                  <span>Estimated price</span>
-                  <strong>{price} ₼</strong>
+
+                  <span>
+                    Estimated price
+                  </span>
+
+                  <strong>
+                    {price} ₼
+                  </strong>
+
                 </div>
               </>
             )}
 
             {bookingStep === 4 && (
               <>
-                <h2>Ваши контакты</h2>
+                <h2>
+                  Ваши контакты
+                </h2>
 
                 <label>
                   Имя
 
                   <input
                     name="name"
-                    value={form.name}
-                    onChange={handleChange}
+                    value={
+                      form.name
+                    }
+                    onChange={
+                      handleChange
+                    }
                     placeholder="Ваше имя"
-                    required
                   />
                 </label>
 
@@ -1129,10 +1489,13 @@ function App() {
 
                   <input
                     name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
+                    value={
+                      form.phone
+                    }
+                    onChange={
+                      handleChange
+                    }
                     placeholder="+994 ..."
-                    required
                   />
                 </label>
 
@@ -1142,27 +1505,39 @@ function App() {
                   <input
                     type="date"
                     name="date"
-                    value={form.date}
-                    onChange={handleChange}
-                    required
+                    value={
+                      form.date
+                    }
+                    onChange={
+                      handleChange
+                    }
                   />
                 </label>
 
                 <div className="estimate">
+
                   <span>
-                    Ориентировочная стоимость
+                    Ориентировочная
+                    стоимость
                   </span>
 
-                  <strong>{price} ₼</strong>
+                  <strong>
+                    {price} ₼
+                  </strong>
+
                 </div>
+
               </>
             )}
 
             <div className="wizard-actions">
+
               {bookingStep > 1 && (
                 <button
                   className="secondary-button"
-                  onClick={previousBookingStep}
+                  onClick={
+                    previousStep
+                  }
                 >
                   ← Назад
                 </button>
@@ -1171,41 +1546,55 @@ function App() {
               {bookingStep < 4 ? (
                 <button
                   className="primary-button"
-                  onClick={nextBookingStep}
+                  onClick={
+                    nextStep
+                  }
                 >
                   Продолжить →
                 </button>
               ) : (
                 <button
                   className="primary-button"
-                  onClick={submitBooking}
+                  onClick={
+                    sendBooking
+                  }
                 >
-                  Отправить в WhatsApp →
+                  WhatsApp →
                 </button>
               )}
+
             </div>
+
           </div>
+
         </div>
       )}
 
-      {/* PRICE CALCULATOR */}
+      {/* ================= CALCULATOR ================= */}
+
       {calculatorOpen && (
         <div
           className="modal-backdrop"
           onMouseDown={() =>
-            setCalculatorOpen(false)
+            setCalculatorOpen(
+              false,
+            )
           }
         >
+
           <div
             className="calculator-modal"
             onMouseDown={(event) =>
               event.stopPropagation()
             }
           >
+
             <button
               className="modal-close"
               onClick={() =>
-                setCalculatorOpen(false)
+                setCalculatorOpen(
+                  false,
+                )
               }
             >
               ×
@@ -1215,94 +1604,151 @@ function App() {
               PRICE CALCULATOR
             </p>
 
-            <h2>{t.calculator}</h2>
+            <h2>
+              Расчёт стоимости
+            </h2>
 
             <label>
               Услуга
 
               <select
                 name="service"
-                value={form.service}
-                onChange={handleChange}
+                value={
+                  form.service
+                }
+                onChange={
+                  handleChange
+                }
               >
-                {services.map((service) => (
-                  <option key={service.title}>
-                    {service.title}
-                  </option>
-                ))}
+                {services.map(
+                  (service) => (
+                    <option
+                      key={
+                        service.title
+                      }
+                    >
+                      {
+                        service.title
+                      }
+                    </option>
+                  ),
+                )}
               </select>
+
             </label>
 
             <div className="wizard-options">
+
               {[
                 'Маленький',
                 'Средний',
                 'Большой',
-              ].map((size) => (
-                <button
-                  className={
-                    form.size === size
-                      ? 'selected'
-                      : ''
-                  }
-                  key={size}
-                  onClick={() =>
-                    setForm((previous) => ({
-                      ...previous,
-                      size,
-                    }))
-                  }
-                >
-                  {size}
-                </button>
-              ))}
+              ].map(
+                (size) => (
+                  <button
+                    key={size}
+                    className={
+                      form.size ===
+                      size
+                        ? 'selected'
+                        : ''
+                    }
+                    onClick={() =>
+                      setForm(
+                        (previous) => ({
+                          ...previous,
+                          size,
+                        }),
+                      )
+                    }
+                  >
+                    {size}
+                  </button>
+                ),
+              )}
+
             </div>
 
             <div className="estimate large">
-              <span>Estimated price</span>
-              <strong>{price} ₼</strong>
+
+              <span>
+                Estimated price
+              </span>
+
+              <strong>
+                {price} ₼
+              </strong>
+
             </div>
 
             <button
               className="primary-button"
               onClick={() => {
-                setCalculatorOpen(false)
+                setCalculatorOpen(
+                  false,
+                )
+
                 openBooking()
               }}
             >
               Записаться →
             </button>
+
           </div>
+
         </div>
       )}
 
-      {/* REAL AI */}
+      {/* ================= REAL AI ================= */}
+
       {aiOpen && (
         <div className="ai-panel">
+
           <div className="ai-header">
+
             <div>
-              <span>AUREN AI</span>
-              <strong>Automotive Assistant</strong>
+
+              <span>
+                AUREN AI
+              </span>
+
+              <strong>
+                Automotive Assistant
+              </strong>
+
             </div>
 
-            <button onClick={() => setAiOpen(false)}>
+            <button
+              onClick={() =>
+                setAiOpen(false)
+              }
+            >
               ×
             </button>
+
           </div>
 
           <div className="ai-content">
-            {aiMessages.map((message, index) => (
-              <div
-                key={`${message.role}-${index}`}
-                className={`ai-message ${
-                  message.role === 'user'
-                    ? 'user'
-                    : 'answer'
-                }`}
-              >
-                {message.content}
-              </div>
-            ))}
+
+            {aiMessages.map(
+              (message, index) => (
+                <div
+                  key={
+                    `${message.role}-${index}`
+                  }
+                  className={
+                    `ai-message ${
+                      message.role ===
+                      'user'
+                        ? 'user'
+                        : 'answer'
+                    }`
+                  }
+                >
+                  {message.content}
+                </div>
+              ),
+            )}
 
             {aiLoading && (
               <div className="ai-message answer">
@@ -1314,6 +1760,7 @@ function App() {
 
             {!aiLoading && (
               <div className="quick-questions">
+
                 <button
                   onClick={() =>
                     askAI(
@@ -1327,101 +1774,138 @@ function App() {
                 <button
                   onClick={() =>
                     askAI(
-                      'Что лучше для ежедневной езды: BMW M5 F90 Competition или Porsche Panamera Turbo? Сравни подробно.',
+                      'Сравни BMW M5 F90 Competition, Mercedes-AMG E63 S W213 и Porsche Panamera Turbo S. Что выбрать и почему?',
                     )
                   }
                 >
-                  M5 F90 vs Panamera Turbo
+                  M5 vs E63 vs Panamera
                 </button>
 
                 <button
                   onClick={() =>
                     askAI(
-                      'Какой автомобиль ты бы посоветовал для быстрой ежедневной езды? Спроси меня необходимые параметры и помоги выбрать.',
+                      'Помоги мне выбрать быстрый автомобиль для ежедневной езды. Сначала задай необходимые вопросы.',
                     )
                   }
                 >
                   Подобрать автомобиль
                 </button>
+
               </div>
             )}
+
           </div>
 
           <div className="ai-input">
+
             <input
-              value={aiQuestion}
+              value={
+                aiQuestion
+              }
               onChange={(event) =>
-                setAiQuestion(event.target.value)
+                setAiQuestion(
+                  event.target
+                    .value,
+                )
               }
               onKeyDown={(event) => {
-                if (event.key === 'Enter') {
+                if (
+                  event.key ===
+                  'Enter'
+                ) {
                   askAI()
                 }
               }}
               placeholder="Спросите что-нибудь об автомобилях..."
-              disabled={aiLoading}
+              disabled={
+                aiLoading
+              }
             />
 
             <button
-              onClick={() => askAI()}
+              onClick={() =>
+                askAI()
+              }
               disabled={
                 aiLoading ||
                 !aiQuestion.trim()
               }
             >
-              {aiLoading ? '…' : '→'}
+              {aiLoading
+                ? '…'
+                : '→'}
             </button>
+
           </div>
+
         </div>
       )}
 
-      {/* CASE */}
+      {/* ================= CASE MODAL ================= */}
+
       {selectedWork && (
         <div
           className="case-backdrop"
           onMouseDown={() =>
-            setSelectedWork(null)
+            setSelectedWork(
+              null,
+            )
           }
         >
+
           <div
             className="case-modal"
             onMouseDown={(event) =>
               event.stopPropagation()
             }
           >
+
             <button
               className="modal-close"
               onClick={() =>
-                setSelectedWork(null)
+                setSelectedWork(
+                  null,
+                )
               }
             >
               ×
             </button>
 
             <p className="eyebrow">
-              CASE STUDY {selectedWork.number}
+              CASE STUDY{' '}
+              {selectedWork.number}
             </p>
 
-            <h2>{selectedWork.title}</h2>
+            <h2>
+              {selectedWork.title}
+            </h2>
 
             <p className="case-category">
               {selectedWork.category}
             </p>
 
             <div className="comparison-image">
+
               <img
-                src={selectedWork.image}
-                alt={selectedWork.title}
+                src={
+                  selectedWork.image
+                }
+                alt={
+                  selectedWork.title
+                }
               />
 
               <div
                 className="comparison-before"
                 style={{
-                  width: `${comparison}%`,
+                  width:
+                    `${comparison}%`,
                 }}
               >
                 <img
-                  src={selectedWork.image}
+                  src={
+                    selectedWork.image
+                  }
                   alt="Before"
                 />
               </div>
@@ -1437,11 +1921,15 @@ function App() {
               <div
                 className="comparison-line"
                 style={{
-                  left: `${comparison}%`,
+                  left:
+                    `${comparison}%`,
                 }}
               >
-                <span>↔</span>
+                <span>
+                  ↔
+                </span>
               </div>
+
             </div>
 
             <input
@@ -1449,20 +1937,30 @@ function App() {
               type="range"
               min="0"
               max="100"
-              value={comparison}
+              value={
+                comparison
+              }
               onChange={(event) =>
                 setComparison(
-                  Number(event.target.value),
+                  Number(
+                    event.target
+                      .value,
+                  ),
                 )
               }
             />
 
             <p className="case-description">
-              {selectedWork.description}
+              {
+                selectedWork.description
+              }
             </p>
+
           </div>
+
         </div>
       )}
+
     </div>
   )
 }
