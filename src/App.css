@@ -1470,3 +1470,42 @@ a {
     width: calc(100% - 20px);
   }
 }
+/* REAL AUREN AI */
+
+.ai-message.user {
+  margin-left: 28px;
+  background: #ff6a00;
+  color: #fff;
+  text-align: right;
+}
+
+.ai-message.answer {
+  border: 1px solid #342216;
+  background: #17100c;
+  color: #ddd;
+}
+
+.typing {
+  color: #ff6a00;
+  animation: aurenTyping 1.2s infinite;
+}
+
+.ai-input button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-input input:disabled {
+  opacity: 0.6;
+}
+
+@keyframes aurenTyping {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

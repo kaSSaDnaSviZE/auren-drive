@@ -17,16 +17,12 @@ const translations = {
     servicesTitle: ['Уход за автомобилем', 'на другом уровне.'],
     worksEyebrow: 'НАШИ РАБОТЫ',
     worksTitle: ['Результат,', 'который видно.'],
-    trustEyebrow: 'ПОЧЕМУ НАМ ДОВЕРЯЮТ',
-    trustTitle: ['Премиальный уход', 'без компромиссов.'],
     aboutEyebrow: 'AUREN AUTO LAB',
     aboutTitle: ['Мы не просто', 'моем машины.'],
     locationEyebrow: 'ГДЕ МЫ',
     locationTitle: ['Найдите нас', 'в Баку.'],
     contactEyebrow: 'КОНТАКТЫ',
     contactTitle: ['Вернём вашему', 'автомобилю блеск.'],
-    demo: 'PORTFOLIO DEMO',
-    tech: 'Built with',
     calculator: 'Рассчитать стоимость',
     ai: 'AUREN AI',
     admin: 'Demo Admin',
@@ -44,16 +40,12 @@ const translations = {
     servicesTitle: ['Avtomobil baxımı', 'yeni səviyyədə.'],
     worksEyebrow: 'İŞLƏRİMİZ',
     worksTitle: ['Nəticə,', 'göz qabağındadır.'],
-    trustEyebrow: 'NİYƏ BİZƏ GÜVƏNİRLƏR',
-    trustTitle: ['Premium qulluq', 'kompromissiz.'],
     aboutEyebrow: 'AUREN AUTO LAB',
     aboutTitle: ['Biz sadəcə', 'maşın yumuruq.'],
     locationEyebrow: 'BİZ HARADAYIQ',
     locationTitle: ['Bizi tapın', 'Bakıda.'],
     contactEyebrow: 'ƏLAQƏ',
     contactTitle: ['Avtomobilinizə', 'yenidən parlaqlıq verək.'],
-    demo: 'PORTFOLIO DEMO',
-    tech: 'Hazırlandı',
     calculator: 'Qiyməti hesabla',
     ai: 'AUREN AI',
     admin: 'Demo Admin',
@@ -71,16 +63,12 @@ const translations = {
     servicesTitle: ['Automotive care', 'at another level.'],
     worksEyebrow: 'OUR WORK',
     worksTitle: ['Results', 'you can see.'],
-    trustEyebrow: 'WHY CLIENTS TRUST US',
-    trustTitle: ['Premium care', 'without compromise.'],
     aboutEyebrow: 'AUREN AUTO LAB',
     aboutTitle: ['We do more', 'than wash cars.'],
     locationEyebrow: 'WHERE WE ARE',
     locationTitle: ['Find us', 'in Baku.'],
     contactEyebrow: 'CONTACT',
     contactTitle: ['Bring back', 'your car’s shine.'],
-    demo: 'PORTFOLIO DEMO',
-    tech: 'Built with',
     calculator: 'Calculate price',
     ai: 'AUREN AI',
     admin: 'Demo Admin',
@@ -117,42 +105,46 @@ const works = [
     title: 'Porsche 911',
     category: 'Полировка кузова',
     image: porscheImg,
-    description: 'Восстановление блеска кузова и финишная полировка.',
+    description:
+      'Восстановление блеска кузова и финишная полировка.',
   },
   {
     number: '02',
     title: 'Porsche 911',
     category: 'Premium Detailing',
     image: porscheImg,
-    description: 'Комплексный уход за кузовом и салоном.',
+    description:
+      'Комплексный уход за кузовом и салоном.',
   },
   {
     number: '03',
     title: 'Porsche 911',
     category: 'Керамика',
     image: porscheImg,
-    description: 'Защитное покрытие с глубоким блеском.',
+    description:
+      'Защитное покрытие с глубоким блеском.',
   },
   {
     number: '04',
     title: 'Porsche 911',
     category: 'Full Refresh',
     image: porscheImg,
-    description: 'Полное визуальное восстановление.',
+    description:
+      'Полное визуальное восстановление.',
   },
-]
-
-const quickQuestions = [
-  'Что лучше для BMW M5?',
-  'Сколько стоит полировка?',
-  'Что выбрать для нового Porsche?',
 ]
 
 function getPage() {
   const hash = window.location.hash.replace('#', '')
-  return ['services', 'works', 'about', 'location', 'contact', 'admin'].includes(
-    hash,
-  )
+
+  return [
+    'services',
+    'works',
+    'about',
+    'location',
+    'contact',
+    'admin',
+  ].includes(hash)
     ? hash
     : 'home'
 }
@@ -163,13 +155,25 @@ function App() {
   const [page, setPage] = useState(getPage())
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState(1)
+
   const [selectedWork, setSelectedWork] = useState(null)
   const [calculatorOpen, setCalculatorOpen] = useState(false)
+
   const [aiOpen, setAiOpen] = useState(false)
   const [aiQuestion, setAiQuestion] = useState('')
-  const [aiAnswer, setAiAnswer] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+
+  const [aiMessages, setAiMessages] = useState([
+    {
+      role: 'assistant',
+      content:
+        'Здравствуйте! Я AUREN AI — автомобильный ассистент. Можете спрашивать меня о двигателях, коробках, надёжности, обслуживании, тюнинге, сравнении автомобилей и практически обо всём, что связано с машинами.',
+    },
+  ])
+
   const [comparison, setComparison] = useState(50)
 
   const [form, setForm] = useState({
@@ -206,7 +210,9 @@ function App() {
   }, [theme])
 
   const price = useMemo(() => {
-    const service = services.find((item) => item.title === form.service)
+    const service = services.find(
+      (item) => item.title === form.service,
+    )
 
     const multipliers = {
       Маленький: 0.85,
@@ -214,7 +220,9 @@ function App() {
       Большой: 1.25,
     }
 
-    return Math.round((service?.price || 150) * multipliers[form.size])
+    return Math.round(
+      (service?.price || 150) * multipliers[form.size],
+    )
   }, [form.service, form.size])
 
   const navigate = (target) => {
@@ -275,36 +283,73 @@ function App() {
     )}`
 
     window.open(url, '_blank', 'noopener,noreferrer')
+
     closeBooking()
   }
 
-  const askAI = () => {
-    const question = aiQuestion.toLowerCase()
+  /*
+   * REAL AI
+   */
+  const askAI = async (customQuestion = '') => {
+    const question = (
+      customQuestion || aiQuestion
+    ).trim()
 
-    if (question.includes('полиров')) {
-      setAiAnswer(
-        'Для восстановления блеска и удаления лёгких дефектов я бы рекомендовал полировку. Для среднего автомобиля ориентировочная стоимость — от 250 ₼.',
-      )
-      return
+    if (!question || aiLoading) return
+
+    const userMessage = {
+      role: 'user',
+      content: question,
     }
 
-    if (question.includes('bmw') || question.includes('m5')) {
-      setAiAnswer(
-        'Для BMW M5 я бы начал с профессионального детейлинга и диагностики состояния ЛКП. После осмотра можно определить, нужна ли полировка или керамическая защита.',
-      )
-      return
-    }
+    const nextMessages = [...aiMessages, userMessage]
 
-    if (question.includes('porsche')) {
-      setAiAnswer(
-        'Для нового Porsche я бы рекомендовал защитное покрытие и бережный детейлинг. Основная задача — сохранить состояние лакокрасочного покрытия.',
-      )
-      return
-    }
+    setAiMessages(nextMessages)
+    setAiQuestion('')
+    setAiLoading(true)
 
-    setAiAnswer(
-      'Для точной рекомендации нужен автомобиль, его состояние и задача. Напишите марку, модель и что хотите улучшить.',
-    )
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: nextMessages,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || 'AI request failed',
+        )
+      }
+
+      setAiMessages((previous) => [
+        ...previous,
+        {
+          role: 'assistant',
+          content:
+            data.answer ||
+            'Модель не вернула текстовый ответ.',
+        },
+      ])
+    } catch (error) {
+      console.error('AUREN AI:', error)
+
+      setAiMessages((previous) => [
+        ...previous,
+        {
+          role: 'assistant',
+          content:
+            'Не удалось получить ответ от AUREN AI. Проверьте подключение API и попробуйте ещё раз.',
+        },
+      ])
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   if (loading) {
@@ -326,17 +371,37 @@ function App() {
   return (
     <div className="site">
       <header className="header">
-        <button className="brand" onClick={() => navigate('home')}>
+        <button
+          className="brand"
+          onClick={() => navigate('home')}
+        >
           <span>AUREN</span> AUTO LAB
         </button>
 
         <nav className="desktop-nav">
-          <button onClick={() => navigate('home')}>{t.nav[0]}</button>
-          <button onClick={() => navigate('services')}>{t.nav[1]}</button>
-          <button onClick={() => navigate('works')}>{t.nav[2]}</button>
-          <button onClick={() => navigate('about')}>{t.nav[3]}</button>
-          <button onClick={() => navigate('location')}>{t.nav[4]}</button>
-          <button onClick={() => navigate('contact')}>{t.nav[5]}</button>
+          <button onClick={() => navigate('home')}>
+            {t.nav[0]}
+          </button>
+
+          <button onClick={() => navigate('services')}>
+            {t.nav[1]}
+          </button>
+
+          <button onClick={() => navigate('works')}>
+            {t.nav[2]}
+          </button>
+
+          <button onClick={() => navigate('about')}>
+            {t.nav[3]}
+          </button>
+
+          <button onClick={() => navigate('location')}>
+            {t.nav[4]}
+          </button>
+
+          <button onClick={() => navigate('contact')}>
+            {t.nav[5]}
+          </button>
         </nav>
 
         <div className="header-actions">
@@ -344,7 +409,9 @@ function App() {
             {['ru', 'az', 'en'].map((item) => (
               <button
                 key={item}
-                className={language === item ? 'active' : ''}
+                className={
+                  language === item ? 'active' : ''
+                }
                 onClick={() => setLanguage(item)}
               >
                 {item.toUpperCase()}
@@ -355,20 +422,30 @@ function App() {
           <button
             className="theme-button"
             onClick={() =>
-              setTheme((value) => (value === 'dark' ? 'light' : 'dark'))
+              setTheme((value) =>
+                value === 'dark' ? 'light' : 'dark',
+              )
             }
           >
             {theme === 'dark' ? '☼' : '☾'}
           </button>
 
-          <button className="primary-button header-booking" onClick={openBooking}>
+          <button
+            className="primary-button header-booking"
+            onClick={openBooking}
+          >
             {t.book}
           </button>
         </div>
 
         <button
-          className={`menu-button ${mobileMenuOpen ? 'active' : ''}`}
-          onClick={() => setMobileMenuOpen((value) => !value)}
+          className={`menu-button ${
+            mobileMenuOpen ? 'active' : ''
+          }`}
+          onClick={() =>
+            setMobileMenuOpen((value) => !value)
+          }
+          aria-label="Открыть меню"
         >
           <span></span>
           <span></span>
@@ -378,19 +455,38 @@ function App() {
 
       {mobileMenuOpen && (
         <div className="mobile-menu">
-          <button onClick={() => navigate('home')}>{t.nav[0]}</button>
-          <button onClick={() => navigate('services')}>{t.nav[1]}</button>
-          <button onClick={() => navigate('works')}>{t.nav[2]}</button>
-          <button onClick={() => navigate('about')}>{t.nav[3]}</button>
-          <button onClick={() => navigate('location')}>{t.nav[4]}</button>
-          <button onClick={() => navigate('contact')}>{t.nav[5]}</button>
+          <button onClick={() => navigate('home')}>
+            {t.nav[0]}
+          </button>
+
+          <button onClick={() => navigate('services')}>
+            {t.nav[1]}
+          </button>
+
+          <button onClick={() => navigate('works')}>
+            {t.nav[2]}
+          </button>
+
+          <button onClick={() => navigate('about')}>
+            {t.nav[3]}
+          </button>
+
+          <button onClick={() => navigate('location')}>
+            {t.nav[4]}
+          </button>
+
+          <button onClick={() => navigate('contact')}>
+            {t.nav[5]}
+          </button>
 
           <div className="mobile-actions">
             <div className="language-switcher">
               {['ru', 'az', 'en'].map((item) => (
                 <button
                   key={item}
-                  className={language === item ? 'active' : ''}
+                  className={
+                    language === item ? 'active' : ''
+                  }
                   onClick={() => setLanguage(item)}
                 >
                   {item.toUpperCase()}
@@ -401,13 +497,22 @@ function App() {
             <button
               className="theme-button"
               onClick={() =>
-                setTheme((value) => (value === 'dark' ? 'light' : 'dark'))
+                setTheme((value) =>
+                  value === 'dark'
+                    ? 'light'
+                    : 'dark',
+                )
               }
             >
-              {theme === 'dark' ? '☼ Светлая' : '☾ Тёмная'}
+              {theme === 'dark'
+                ? '☼ Светлая'
+                : '☾ Тёмная'}
             </button>
 
-            <button className="primary-button" onClick={openBooking}>
+            <button
+              className="primary-button"
+              onClick={openBooking}
+            >
               {t.book}
             </button>
           </div>
@@ -419,7 +524,9 @@ function App() {
           <>
             <section className="hero">
               <div className="hero-content reveal">
-                <p className="eyebrow">{t.heroEyebrow}</p>
+                <p className="eyebrow">
+                  {t.heroEyebrow}
+                </p>
 
                 <h1>
                   {t.heroTitle[0]}
@@ -429,10 +536,15 @@ function App() {
                   <span>{t.heroTitle[2]}</span>
                 </h1>
 
-                <p className="hero-description">{t.heroText}</p>
+                <p className="hero-description">
+                  {t.heroText}
+                </p>
 
                 <div className="hero-buttons">
-                  <button className="primary-button" onClick={openBooking}>
+                  <button
+                    className="primary-button"
+                    onClick={openBooking}
+                  >
                     {t.book}
                   </button>
 
@@ -449,7 +561,10 @@ function App() {
                 <div className="glow"></div>
 
                 <div className="car-image-wrapper">
-                  <img src={porscheImg} alt="Porsche 911" />
+                  <img
+                    src={porscheImg}
+                    alt="Porsche 911"
+                  />
                 </div>
 
                 <div className="visual-label">
@@ -478,7 +593,10 @@ function App() {
 
             <section className="preview-section">
               <div className="section-heading">
-                <p className="eyebrow">{t.servicesEyebrow}</p>
+                <p className="eyebrow">
+                  {t.servicesEyebrow}
+                </p>
+
                 <h2>
                   {t.servicesTitle[0]}
                   <br />
@@ -488,11 +606,21 @@ function App() {
 
               <div className="service-grid">
                 {services.map((service) => (
-                  <article className="service-card" key={service.number}>
-                    <span className="service-number">{service.number}</span>
+                  <article
+                    className="service-card"
+                    key={service.number}
+                  >
+                    <span className="service-number">
+                      {service.number}
+                    </span>
+
                     <h3>{service.title}</h3>
+
                     <p>{service.description}</p>
-                    <strong>от {service.price} ₼</strong>
+
+                    <strong>
+                      от {service.price} ₼
+                    </strong>
 
                     <button
                       className="card-button"
@@ -501,6 +629,7 @@ function App() {
                           ...previous,
                           service: service.title,
                         }))
+
                         setCalculatorOpen(true)
                       }}
                     >
@@ -514,10 +643,18 @@ function App() {
             <section className="ai-banner">
               <div>
                 <span>AUREN AI</span>
-                <h2>Ваш персональный<br />автоконсультант.</h2>
+
+                <h2>
+                  Ваш персональный
+                  <br />
+                  автоконсультант.
+                </h2>
               </div>
 
-              <button className="primary-button" onClick={() => setAiOpen(true)}>
+              <button
+                className="primary-button"
+                onClick={() => setAiOpen(true)}
+              >
                 Открыть AI →
               </button>
             </section>
@@ -527,15 +664,28 @@ function App() {
         {page === 'services' && (
           <section className="page-section">
             <p className="eyebrow">SERVICES</p>
-            <h1 className="page-title">Услуги и стоимость</h1>
+
+            <h1 className="page-title">
+              Услуги и стоимость
+            </h1>
 
             <div className="service-grid large">
               {services.map((service) => (
-                <article className="service-card" key={service.number}>
-                  <span className="service-number">{service.number}</span>
+                <article
+                  className="service-card"
+                  key={service.number}
+                >
+                  <span className="service-number">
+                    {service.number}
+                  </span>
+
                   <h3>{service.title}</h3>
+
                   <p>{service.description}</p>
-                  <strong>от {service.price} ₼</strong>
+
+                  <strong>
+                    от {service.price} ₼
+                  </strong>
 
                   <button
                     className="card-button"
@@ -544,6 +694,7 @@ function App() {
                         ...previous,
                         service: service.title,
                       }))
+
                       setCalculatorOpen(true)
                     }}
                   >
@@ -557,8 +708,14 @@ function App() {
 
         {page === 'works' && (
           <section className="page-section">
-            <p className="eyebrow">{t.worksEyebrow}</p>
-            <h1 className="page-title">{t.worksTitle[0]} {t.worksTitle[1]}</h1>
+            <p className="eyebrow">
+              {t.worksEyebrow}
+            </p>
+
+            <h1 className="page-title">
+              {t.worksTitle[0]}{' '}
+              {t.worksTitle[1]}
+            </h1>
 
             <div className="works-grid">
               {works.map((work) => (
@@ -570,7 +727,10 @@ function App() {
                     setComparison(50)
                   }}
                 >
-                  <img src={work.image} alt={work.title} />
+                  <img
+                    src={work.image}
+                    alt={work.title}
+                  />
 
                   <div className="work-overlay">
                     <span>{work.number}</span>
@@ -590,7 +750,10 @@ function App() {
 
         {page === 'about' && (
           <section className="page-section about-page">
-            <p className="eyebrow">{t.aboutEyebrow}</p>
+            <p className="eyebrow">
+              {t.aboutEyebrow}
+            </p>
+
             <h1 className="page-title">
               {t.aboutTitle[0]}
               <br />
@@ -600,19 +763,22 @@ function App() {
             <div className="about-grid">
               <div>
                 <p>
-                  AUREN AUTO LAB — демонстрационный premium automotive
-                  бренд, созданный как showcase современного web-development.
+                  AUREN AUTO LAB — демонстрационный
+                  premium automotive проект,
+                  созданный как showcase современного
+                  web-development.
                 </p>
 
                 <p>
-                  Проект демонстрирует responsive UI, локализацию,
-                  интерактивные формы, price calculator, AI assistant,
+                  Проект демонстрирует responsive UI,
+                  локализацию, интерактивные формы,
+                  price calculator, AI assistant,
                   dashboard и deployment на Vercel.
                 </p>
               </div>
 
               <div className="tech-card">
-                <span>{t.tech}</span>
+                <span>BUILT WITH</span>
 
                 <div className="tech-list">
                   <strong>React</strong>
@@ -621,6 +787,7 @@ function App() {
                   <strong>CSS</strong>
                   <strong>Vercel</strong>
                   <strong>GitHub</strong>
+                  <strong>Groq AI</strong>
                 </div>
               </div>
             </div>
@@ -629,7 +796,9 @@ function App() {
 
         {page === 'location' && (
           <section className="page-section">
-            <p className="eyebrow">{t.locationEyebrow}</p>
+            <p className="eyebrow">
+              {t.locationEyebrow}
+            </p>
 
             <h1 className="page-title">
               {t.locationTitle[0]}
@@ -640,9 +809,14 @@ function App() {
             <div className="location-layout">
               <div className="location-info">
                 <span>DEMO LOCATION</span>
-                <strong>Babək prospekti · Bakı</strong>
+
+                <strong>
+                  Babək prospekti · Bakı
+                </strong>
+
                 <p>
-                  Демонстрационная точка для portfolio project.
+                  Демонстрационная точка для
+                  portfolio project.
                 </p>
 
                 <a
@@ -670,7 +844,9 @@ function App() {
 
         {page === 'contact' && (
           <section className="page-section">
-            <p className="eyebrow">{t.contactEyebrow}</p>
+            <p className="eyebrow">
+              {t.contactEyebrow}
+            </p>
 
             <h1 className="page-title">
               {t.contactTitle[0]}
@@ -685,7 +861,9 @@ function App() {
                 rel="noreferrer"
               >
                 <span>WhatsApp</span>
-                <strong>+994 55 475 00 60</strong>
+                <strong>
+                  +994 55 475 00 60
+                </strong>
               </a>
 
               <a
@@ -694,21 +872,30 @@ function App() {
                 rel="noreferrer"
               >
                 <span>Instagram</span>
-                <strong>@KASSADnaSviZE</strong>
+                <strong>
+                  @KASSADnaSviZE
+                </strong>
               </a>
 
               <div>
                 <span>Локация</span>
-                <strong>Babək prospekti · Bakı</strong>
+                <strong>
+                  Babək prospekti · Bakı
+                </strong>
               </div>
 
               <div>
                 <span>График</span>
-                <strong>Пн–Сб · 09:00–21:00</strong>
+                <strong>
+                  Пн–Сб · 09:00–21:00
+                </strong>
               </div>
             </div>
 
-            <button className="primary-button" onClick={openBooking}>
+            <button
+              className="primary-button"
+              onClick={openBooking}
+            >
               {t.book}
             </button>
           </section>
@@ -718,11 +905,16 @@ function App() {
           <section className="admin-page">
             <div className="admin-header">
               <div>
-                <p className="eyebrow">DEMO ADMIN</p>
+                <p className="eyebrow">
+                  DEMO ADMIN
+                </p>
+
                 <h1>AUREN Dashboard</h1>
               </div>
 
-              <span className="admin-status">● LIVE DEMO</span>
+              <span className="admin-status">
+                ● LIVE DEMO
+              </span>
             </div>
 
             <div className="dashboard-cards">
@@ -748,7 +940,9 @@ function App() {
             </div>
 
             <div className="dashboard-table">
-              <div className="table-title">Upcoming appointments</div>
+              <div className="table-title">
+                Upcoming appointments
+              </div>
 
               <div className="table-row">
                 <strong>BMW M5</strong>
@@ -773,21 +967,6 @@ function App() {
             </div>
           </section>
         )}
-
-        {!['home', 'services', 'works', 'about', 'location', 'contact', 'admin'].includes(
-          page,
-        ) && (
-          <section className="not-found">
-            <span>404</span>
-            <h1>This road doesn't exist.</h1>
-            <button
-              className="primary-button"
-              onClick={() => navigate('home')}
-            >
-              Back to Garage →
-            </button>
-          </section>
-        )}
       </main>
 
       <footer>
@@ -796,7 +975,10 @@ function App() {
             <span>AUREN</span> AUTO LAB
           </div>
 
-          <p>Premium automotive care · Baku, Azerbaijan · Portfolio Demo</p>
+          <p>
+            Premium automotive care · Baku,
+            Azerbaijan · Portfolio Demo
+          </p>
         </div>
 
         <button onClick={() => navigate('admin')}>
@@ -804,25 +986,42 @@ function App() {
         </button>
       </footer>
 
-      <button className="mobile-booking" onClick={openBooking}>
+      <button
+        className="mobile-booking"
+        onClick={openBooking}
+      >
         {t.book}
       </button>
 
-      {/* BOOKING WIZARD */}
+      {/* BOOKING */}
       {isBookingOpen && (
-        <div className="modal-backdrop" onMouseDown={closeBooking}>
+        <div
+          className="modal-backdrop"
+          onMouseDown={closeBooking}
+        >
           <div
             className="booking-modal"
-            onMouseDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) =>
+              event.stopPropagation()
+            }
           >
-            <button className="modal-close" onClick={closeBooking}>
+            <button
+              className="modal-close"
+              onClick={closeBooking}
+            >
               ×
             </button>
 
-            <p className="eyebrow">BOOKING · STEP {bookingStep}/4</p>
+            <p className="eyebrow">
+              BOOKING · STEP {bookingStep}/4
+            </p>
 
             <div className="progress">
-              <div style={{ width: `${bookingStep * 25}%` }}></div>
+              <div
+                style={{
+                  width: `${bookingStep * 25}%`,
+                }}
+              ></div>
             </div>
 
             {bookingStep === 1 && (
@@ -831,6 +1030,7 @@ function App() {
 
                 <label>
                   Марка и модель
+
                   <input
                     name="car"
                     value={form.car}
@@ -850,7 +1050,9 @@ function App() {
                   {services.map((service) => (
                     <button
                       className={
-                        form.service === service.title ? 'selected' : ''
+                        form.service === service.title
+                          ? 'selected'
+                          : ''
                       }
                       key={service.title}
                       onClick={() =>
@@ -861,7 +1063,9 @@ function App() {
                       }
                     >
                       <span>{service.title}</span>
-                      <b>от {service.price} ₼</b>
+                      <b>
+                        от {service.price} ₼
+                      </b>
                     </button>
                   ))}
                 </div>
@@ -873,9 +1077,17 @@ function App() {
                 <h2>Размер автомобиля</h2>
 
                 <div className="wizard-options">
-                  {['Маленький', 'Средний', 'Большой'].map((size) => (
+                  {[
+                    'Маленький',
+                    'Средний',
+                    'Большой',
+                  ].map((size) => (
                     <button
-                      className={form.size === size ? 'selected' : ''}
+                      className={
+                        form.size === size
+                          ? 'selected'
+                          : ''
+                      }
                       key={size}
                       onClick={() =>
                         setForm((previous) => ({
@@ -902,6 +1114,7 @@ function App() {
 
                 <label>
                   Имя
+
                   <input
                     name="name"
                     value={form.name}
@@ -913,6 +1126,7 @@ function App() {
 
                 <label>
                   Телефон
+
                   <input
                     name="phone"
                     value={form.phone}
@@ -924,6 +1138,7 @@ function App() {
 
                 <label>
                   Дата
+
                   <input
                     type="date"
                     name="date"
@@ -934,7 +1149,10 @@ function App() {
                 </label>
 
                 <div className="estimate">
-                  <span>Ориентировочная стоимость</span>
+                  <span>
+                    Ориентировочная стоимость
+                  </span>
+
                   <strong>{price} ₼</strong>
                 </div>
               </>
@@ -951,7 +1169,10 @@ function App() {
               )}
 
               {bookingStep < 4 ? (
-                <button className="primary-button" onClick={nextBookingStep}>
+                <button
+                  className="primary-button"
+                  onClick={nextBookingStep}
+                >
                   Продолжить →
                 </button>
               ) : (
@@ -967,44 +1188,63 @@ function App() {
         </div>
       )}
 
-      {/* CALCULATOR */}
+      {/* PRICE CALCULATOR */}
       {calculatorOpen && (
         <div
           className="modal-backdrop"
-          onMouseDown={() => setCalculatorOpen(false)}
+          onMouseDown={() =>
+            setCalculatorOpen(false)
+          }
         >
           <div
             className="calculator-modal"
-            onMouseDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) =>
+              event.stopPropagation()
+            }
           >
             <button
               className="modal-close"
-              onClick={() => setCalculatorOpen(false)}
+              onClick={() =>
+                setCalculatorOpen(false)
+              }
             >
               ×
             </button>
 
-            <p className="eyebrow">PRICE CALCULATOR</p>
+            <p className="eyebrow">
+              PRICE CALCULATOR
+            </p>
 
             <h2>{t.calculator}</h2>
 
             <label>
               Услуга
+
               <select
                 name="service"
                 value={form.service}
                 onChange={handleChange}
               >
                 {services.map((service) => (
-                  <option key={service.title}>{service.title}</option>
+                  <option key={service.title}>
+                    {service.title}
+                  </option>
                 ))}
               </select>
             </label>
 
             <div className="wizard-options">
-              {['Маленький', 'Средний', 'Большой'].map((size) => (
+              {[
+                'Маленький',
+                'Средний',
+                'Большой',
+              ].map((size) => (
                 <button
-                  className={form.size === size ? 'selected' : ''}
+                  className={
+                    form.size === size
+                      ? 'selected'
+                      : ''
+                  }
                   key={size}
                   onClick={() =>
                     setForm((previous) => ({
@@ -1036,68 +1276,124 @@ function App() {
         </div>
       )}
 
-      {/* AI */}
+      {/* REAL AI */}
       {aiOpen && (
         <div className="ai-panel">
           <div className="ai-header">
             <div>
               <span>AUREN AI</span>
-              <strong>Auto Consultant</strong>
+              <strong>Automotive Assistant</strong>
             </div>
 
-            <button onClick={() => setAiOpen(false)}>×</button>
+            <button onClick={() => setAiOpen(false)}>
+              ×
+            </button>
           </div>
 
           <div className="ai-content">
-            <div className="ai-message">
-              Здравствуйте! Расскажите, какой у вас автомобиль и что хотите
-              улучшить.
-            </div>
+            {aiMessages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}`}
+                className={`ai-message ${
+                  message.role === 'user'
+                    ? 'user'
+                    : 'answer'
+                }`}
+              >
+                {message.content}
+              </div>
+            ))}
 
-            {aiAnswer && <div className="ai-message answer">{aiAnswer}</div>}
+            {aiLoading && (
+              <div className="ai-message answer">
+                <span className="typing">
+                  AUREN AI печатает...
+                </span>
+              </div>
+            )}
 
-            <div className="quick-questions">
-              {quickQuestions.map((question) => (
+            {!aiLoading && (
+              <div className="quick-questions">
                 <button
-                  key={question}
-                  onClick={() => {
-                    setAiQuestion(question)
-                    setTimeout(askAI, 0)
-                  }}
+                  onClick={() =>
+                    askAI(
+                      'Расскажи подробно про BMW M5 F90 Competition: двигатель, коробка, разгон, расход, слабые места и обслуживание.',
+                    )
+                  }
                 >
-                  {question}
+                  BMW M5 F90 Competition
                 </button>
-              ))}
-            </div>
+
+                <button
+                  onClick={() =>
+                    askAI(
+                      'Что лучше для ежедневной езды: BMW M5 F90 Competition или Porsche Panamera Turbo? Сравни подробно.',
+                    )
+                  }
+                >
+                  M5 F90 vs Panamera Turbo
+                </button>
+
+                <button
+                  onClick={() =>
+                    askAI(
+                      'Какой автомобиль ты бы посоветовал для быстрой ежедневной езды? Спроси меня необходимые параметры и помоги выбрать.',
+                    )
+                  }
+                >
+                  Подобрать автомобиль
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="ai-input">
             <input
               value={aiQuestion}
-              onChange={(event) => setAiQuestion(event.target.value)}
+              onChange={(event) =>
+                setAiQuestion(event.target.value)
+              }
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   askAI()
                 }
               }}
-              placeholder="Напишите вопрос..."
+              placeholder="Спросите что-нибудь об автомобилях..."
+              disabled={aiLoading}
             />
 
-            <button onClick={askAI}>→</button>
+            <button
+              onClick={() => askAI()}
+              disabled={
+                aiLoading ||
+                !aiQuestion.trim()
+              }
+            >
+              {aiLoading ? '…' : '→'}
+            </button>
           </div>
         </div>
       )}
 
-      {/* CASE STUDY */}
+      {/* CASE */}
       {selectedWork && (
-        <div className="case-backdrop" onMouseDown={() => setSelectedWork(null)}>
+        <div
+          className="case-backdrop"
+          onMouseDown={() =>
+            setSelectedWork(null)
+          }
+        >
           <div
             className="case-modal"
-            onMouseDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) =>
+              event.stopPropagation()
+            }
           >
             <button
               className="modal-close"
-              onClick={() => setSelectedWork(null)}
+              onClick={() =>
+                setSelectedWork(null)
+              }
             >
               ×
             </button>
@@ -1107,24 +1403,42 @@ function App() {
             </p>
 
             <h2>{selectedWork.title}</h2>
-            <p className="case-category">{selectedWork.category}</p>
+
+            <p className="case-category">
+              {selectedWork.category}
+            </p>
 
             <div className="comparison-image">
-              <img src={selectedWork.image} alt={selectedWork.title} />
+              <img
+                src={selectedWork.image}
+                alt={selectedWork.title}
+              />
 
               <div
                 className="comparison-before"
-                style={{ width: `${comparison}%` }}
+                style={{
+                  width: `${comparison}%`,
+                }}
               >
-                <img src={selectedWork.image} alt="Before" />
+                <img
+                  src={selectedWork.image}
+                  alt="Before"
+                />
               </div>
 
-              <div className="comparison-label before">BEFORE</div>
-              <div className="comparison-label after">AFTER</div>
+              <div className="comparison-label before">
+                BEFORE
+              </div>
+
+              <div className="comparison-label after">
+                AFTER
+              </div>
 
               <div
                 className="comparison-line"
-                style={{ left: `${comparison}%` }}
+                style={{
+                  left: `${comparison}%`,
+                }}
               >
                 <span>↔</span>
               </div>
@@ -1137,7 +1451,9 @@ function App() {
               max="100"
               value={comparison}
               onChange={(event) =>
-                setComparison(Number(event.target.value))
+                setComparison(
+                  Number(event.target.value),
+                )
               }
             />
 
