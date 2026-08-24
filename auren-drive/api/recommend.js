@@ -1,27 +1,137 @@
 const CARS = [
   {
+    id: 'toyota-camry',
+    brand: 'Toyota',
+    name: 'Toyota Camry',
+    priceMin: 700000,
+    priceMax: 1600000,
+    price: '0.7–1.6 млн ₽',
+    power: '181 л.с.',
+    drive: 'FWD',
+    body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Комфорт', 'Надёжность', 'Business'],
+    scores: {
+      performance: 60,
+      comfort: 90,
+      reliability: 95,
+      economy: 78,
+      image: 82,
+      offroad: 10,
+      maintenance: 90,
+    },
+    pros: [
+      'Хорошая репутация по надёжности',
+      'Комфортна для города и трассы',
+      'Предсказуемое обслуживание',
+      'Высокая ликвидность',
+    ],
+    cons: [
+      'Не самая спортивная динамика',
+      'Передний привод',
+    ],
+    buyingFocus:
+      'Проверить кузов, вариатор или АКПП в зависимости от версии, состояние подвески и историю обслуживания.',
+  },
+
+  {
+    id: 'lexus-is250',
+    brand: 'Lexus',
+    name: 'Lexus IS 250',
+    priceMin: 900000,
+    priceMax: 1800000,
+    price: '0.9–1.8 млн ₽',
+    power: '208 л.с.',
+    drive: 'RWD',
+    body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Комфорт', 'Надёжность', 'RWD'],
+    scores: {
+      performance: 72,
+      comfort: 89,
+      reliability: 91,
+      economy: 66,
+      image: 88,
+      offroad: 10,
+      maintenance: 82,
+    },
+    pros: [
+      'Задний привод',
+      'Комфортный салон',
+      'Хорошая надёжность',
+      'Более интересная управляемость',
+    ],
+    cons: [
+      'Возраст большинства экземпляров',
+      'Расход выше среднего',
+    ],
+    buyingFocus:
+      'Проверить кузов, автоматическую коробку, двигатель, систему охлаждения и историю обслуживания.',
+  },
+
+  {
+    id: 'bmw-f30-320i',
+    brand: 'BMW',
+    name: 'BMW 320i F30',
+    priceMin: 1000000,
+    priceMax: 1900000,
+    price: '1.0–1.9 млн ₽',
+    power: '184 л.с.',
+    drive: 'RWD',
+    body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1556189250-72ba954cfc2b?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Динамика', 'RWD', 'Premium'],
+    scores: {
+      performance: 78,
+      comfort: 82,
+      reliability: 68,
+      economy: 68,
+      image: 90,
+      offroad: 10,
+      maintenance: 55,
+    },
+    pros: [
+      'Хорошая управляемость',
+      'Задний привод',
+      'Приятная динамика',
+      'Premium-интерьер',
+    ],
+    cons: [
+      'Состояние конкретного экземпляра очень важно',
+      'Обслуживание дороже массовых моделей',
+    ],
+    buyingFocus:
+      'Проверить двигатель, цепь ГРМ на соответствующих моторах, коробку, течи и историю обслуживания.',
+  },
+
+  {
     id: 'bmw-m340i',
     brand: 'BMW',
     name: 'BMW M340i xDrive',
     priceMin: 3000000,
     priceMax: 4000000,
-    priceLabel: '3.0–4.0 млн ₽',
+    price: '3.0–4.0 млн ₽',
     power: '374 л.с.',
     drive: 'AWD',
     body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Динамика', 'Комфорт', 'AWD'],
     scores: {
       performance: 95,
       comfort: 88,
       reliability: 84,
       economy: 65,
-      image: 90,
+      image: 93,
       offroad: 20,
       maintenance: 62,
     },
-    tags: ['Динамика', 'Комфорт', 'AWD'],
     pros: [
-      'Сильная динамика',
-      'Хороший баланс комфорта и управляемости',
+      'Очень сильная динамика',
+      'Отличный баланс комфорта и драйва',
       'Полный привод',
       'Подходит для ежедневной эксплуатации',
     ],
@@ -30,9 +140,7 @@ const CARS = [
       'Хорошие экземпляры стоят дорого',
     ],
     buyingFocus:
-      'Проверить историю обслуживания, двигатель, систему охлаждения, коробку, полный привод и кузов.',
-    image:
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=85',
+      'Проверить историю обслуживания, двигатель, охлаждение, коробку, полный привод и кузов.',
   },
 
   {
@@ -41,25 +149,27 @@ const CARS = [
     name: 'Mercedes-AMG E53',
     priceMin: 4000000,
     priceMax: 5500000,
-    priceLabel: '4.0–5.5 млн ₽',
+    price: '4.0–5.5 млн ₽',
     power: '435 л.с.',
     drive: 'AWD',
     body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Комфорт', 'Динамика', 'Premium'],
     scores: {
       performance: 91,
       comfort: 96,
       reliability: 78,
       economy: 58,
-      image: 94,
+      image: 96,
       offroad: 15,
       maintenance: 52,
     },
-    tags: ['Комфорт', 'Динамика', 'Premium'],
     pros: [
-      'Очень комфортный',
+      'Очень высокий уровень комфорта',
       'Сильная динамика',
       'Премиальный интерьер',
-      'Хорошо подходит для трассы',
+      'Отличен для трассы',
     ],
     cons: [
       'Сложная силовая установка',
@@ -67,8 +177,6 @@ const CARS = [
     ],
     buyingFocus:
       'Проверить силовую установку, электронику, подвеску, коробку и историю обслуживания.',
-    image:
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=85',
   },
 
   {
@@ -77,10 +185,13 @@ const CARS = [
     name: 'Porsche Panamera 4S',
     priceMin: 5000000,
     priceMax: 7000000,
-    priceLabel: '5.0–7.0 млн ₽',
+    price: '5.0–7.0 млн ₽',
     power: '440 л.с.',
     drive: 'AWD',
     body: 'Лифтбек',
+    image:
+      'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Luxury', 'Динамика', 'AWD'],
     scores: {
       performance: 96,
       comfort: 94,
@@ -90,7 +201,6 @@ const CARS = [
       offroad: 10,
       maintenance: 40,
     },
-    tags: ['Luxury', 'Динамика', 'AWD'],
     pros: [
       'Сочетание спорта и комфорта',
       'Отличная управляемость',
@@ -102,9 +212,7 @@ const CARS = [
       'Требует очень тщательной проверки',
     ],
     buyingFocus:
-      'Проверить историю, двигатель, коробку, подвеску, электронику и дорогие ремонты.',
-    image:
-      'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1200&q=85',
+      'Проверить историю автомобиля, двигатель, коробку, подвеску и электронику.',
   },
 
   {
@@ -113,34 +221,34 @@ const CARS = [
     name: 'Audi S6',
     priceMin: 3000000,
     priceMax: 4500000,
-    priceLabel: '3.0–4.5 млн ₽',
+    price: '3.0–4.5 млн ₽',
     power: '450 л.с.',
     drive: 'AWD',
     body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Комфорт', 'AWD', 'Performance'],
     scores: {
       performance: 93,
       comfort: 91,
       reliability: 76,
       economy: 55,
-      image: 87,
+      image: 90,
       offroad: 15,
       maintenance: 55,
     },
-    tags: ['Комфорт', 'AWD', 'Performance'],
     pros: [
       'Высокая динамика',
       'Полный привод',
       'Комфортный салон',
-      'Хорошо подходит для трассы',
+      'Подходит для трассы',
     ],
     cons: [
       'Сложная электроника',
       'Обслуживание не бюджетное',
     ],
     buyingFocus:
-      'Проверить двигатель, коробку, электронику, подвеску и полную историю обслуживания.',
-    image:
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1200&q=85',
+      'Проверить двигатель, коробку, электронику, подвеску и историю обслуживания.',
   },
 
   {
@@ -149,20 +257,22 @@ const CARS = [
     name: 'Lexus ES',
     priceMin: 3000000,
     priceMax: 4500000,
-    priceLabel: '3.0–4.5 млн ₽',
+    price: '3.0–4.5 млн ₽',
     power: '249 л.с.',
     drive: 'FWD',
     body: 'Седан',
+    image:
+      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1400&q=85',
+    tags: ['Комфорт', 'Надёжность', 'Business'],
     scores: {
       performance: 65,
       comfort: 94,
       reliability: 95,
       economy: 78,
-      image: 83,
+      image: 88,
       offroad: 10,
       maintenance: 86,
     },
-    tags: ['Комфорт', 'Надёжность', 'Business'],
     pros: [
       'Высокий комфорт',
       'Хорошая репутация по надёжности',
@@ -174,9 +284,7 @@ const CARS = [
       'Передний привод',
     ],
     buyingFocus:
-      'Проверить кузов, историю обслуживания, состояние подвески и работу электроники.',
-    image:
-      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=85',
+      'Проверить кузов, историю обслуживания, состояние подвески и электронных систем.',
   },
 
   {
@@ -185,20 +293,22 @@ const CARS = [
     name: 'Toyota Land Cruiser',
     priceMin: 6000000,
     priceMax: 10000000,
-    priceLabel: '6.0–10.0 млн ₽',
+    price: '6.0–10.0 млн ₽',
     power: '300+ л.с.',
     drive: 'AWD',
     body: 'SUV',
+    image:
+      'https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=1400&q=85',
+    tags: ['SUV', 'AWD', 'Надёжность'],
     scores: {
       performance: 72,
       comfort: 91,
       reliability: 96,
       economy: 40,
-      image: 94,
+      image: 95,
       offroad: 100,
       maintenance: 80,
     },
-    tags: ['SUV', 'AWD', 'Надёжность'],
     pros: [
       'Отличная проходимость',
       'Высокая практичность',
@@ -211,141 +321,113 @@ const CARS = [
     ],
     buyingFocus:
       'Проверить раму, трансмиссию, подвеску и историю эксплуатации.',
-    image:
-      'https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=1200&q=85',
   },
 ]
 
-function parseBudget(value) {
-  if (!value) {
-    return {
-      min: 0,
-      max: Number.POSITIVE_INFINITY,
-    }
-  }
+function getBudgetRange(value) {
+  switch (value) {
+    case 'До 1 млн ₽':
+      return { min: 0, max: 1000000 }
 
-  if (value.includes('До 1 млн')) {
-    return { min: 0, max: 1000000 }
-  }
+    case '1–2 млн ₽':
+      return { min: 1000000, max: 2000000 }
 
-  if (value.includes('1–2 млн')) {
-    return { min: 1000000, max: 2000000 }
-  }
+    case '2–3 млн ₽':
+      return { min: 2000000, max: 3000000 }
 
-  if (value.includes('2–3 млн')) {
-    return { min: 2000000, max: 3000000 }
-  }
+    case '3–5 млн ₽':
+      return { min: 3000000, max: 5000000 }
 
-  if (value.includes('3–5 млн')) {
-    return { min: 3000000, max: 5000000 }
-  }
+    case '5–10 млн ₽':
+      return { min: 5000000, max: 10000000 }
 
-  if (value.includes('5–10 млн')) {
-    return { min: 5000000, max: 10000000 }
-  }
+    case '10+ млн ₽':
+      return {
+        min: 10000000,
+        max: Infinity,
+      }
 
-  if (value.includes('10+ млн')) {
-    return {
-      min: 10000000,
-      max: Number.POSITIVE_INFINITY,
-    }
-  }
-
-  return {
-    min: 0,
-    max: Number.POSITIVE_INFINITY,
+    default:
+      return {
+        min: 0,
+        max: Infinity,
+      }
   }
 }
 
-function budgetScore(car, budget) {
-  if (
+function matchesBudget(car, budget) {
+  return (
     car.priceMin >= budget.min &&
-    car.priceMax <= budget.max
-  ) {
-    return 100
-  }
-
-  if (
-    car.priceMin <= budget.max &&
-    car.priceMax >= budget.min
-  ) {
-    return 65
-  }
-
-  if (car.priceMin > budget.max) {
-    return 5
-  }
-
-  return 30
+    car.priceMin <= budget.max
+  )
 }
 
-function bodyScore(car, bodies) {
-  if (!bodies?.length) return 70
-  if (bodies.includes('Не имеет значения')) return 80
-  if (bodies.includes(car.body)) return 100
+function scoreCar(car, answers, budget) {
+  let score = 0
 
-  if (
-    car.body === 'SUV' &&
-    bodies.includes('Кроссовер')
-  ) {
-    return 90
+  const priorities = answers.priority || []
+  const bodies = answers.body || []
+  const drives = answers.drive || []
+  const brands = answers.brand || []
+
+  // Бюджет — обязательный фильтр.
+  if (!matchesBudget(car, budget)) {
+    return -1
   }
 
-  return 15
-}
+  // Бюджет.
+  score += 35
 
-function driveScore(car, drives) {
-  if (!drives?.length) return 70
-  if (drives.includes('Не имеет значения')) return 80
-
+  // Кузов.
   if (
-    drives.includes('Полный') &&
-    car.drive === 'AWD'
+    !bodies.length ||
+    bodies.includes('Не имеет значения') ||
+    bodies.includes(car.body)
   ) {
-    return 100
+    score += 15
   }
 
+  // Привод.
   if (
-    drives.includes('Передний') &&
-    car.drive === 'FWD'
+    !drives.length ||
+    drives.includes('Не имеет значения')
   ) {
-    return 100
+    score += 7
+  } else if (
+    (drives.includes('Полный') &&
+      car.drive === 'AWD') ||
+    (drives.includes('Передний') &&
+      car.drive === 'FWD') ||
+    (drives.includes('Задний') &&
+      car.drive === 'RWD')
+  ) {
+    score += 10
+  } else {
+    score -= 8
   }
 
+  // Бренд.
   if (
-    drives.includes('Задний') &&
-    car.drive === 'RWD'
+    !brands.length ||
+    brands.includes('Любая марка')
   ) {
-    return 100
-  }
-
-  return 20
-}
-
-function brandScore(car, brands) {
-  if (!brands?.length) return 75
-  if (brands.includes('Любая марка')) return 80
-
-  if (
-    brands.includes('Porsche / BMW / Mercedes') &&
-    ['Porsche', 'BMW', 'Mercedes-Benz'].includes(
-      car.brand,
+    score += 7
+  } else if (
+    brands.includes(car.brand) ||
+    (
+      brands.includes(
+        'Porsche / BMW / Mercedes',
+      ) &&
+      ['Porsche', 'BMW', 'Mercedes-Benz'].includes(
+        car.brand,
+      )
     )
   ) {
-    return 100
+    score += 10
   }
 
-  if (brands.includes(car.brand)) {
-    return 100
-  }
-
-  return 40
-}
-
-function priorityScore(car, priorities) {
-  if (!priorities?.length) return 70
-
-  const map = {
+  // Приоритеты.
+  const priorityMap = {
     Динамика: 'performance',
     Комфорт: 'comfort',
     Надёжность: 'reliability',
@@ -353,151 +435,122 @@ function priorityScore(car, priorities) {
     Имидж: 'image',
     Проходимость: 'offroad',
     'Дешёвое обслуживание': 'maintenance',
+    Технологичность: 'technology',
   }
 
-  const scores = priorities
-    .map((priority) => map[priority])
+  const values = priorities
+    .map((item) => priorityMap[item])
     .filter(Boolean)
     .map((key) => car.scores[key])
 
-  if (!scores.length) return 70
-
-  return (
-    scores.reduce(
-      (total, value) => total + value,
-      0,
-    ) / scores.length
-  )
-}
-
-function performanceScore(car, answer) {
-  if (!answer) return 70
-
-  const targets = {
-    Спокойная: 45,
-    Бодрая: 65,
-    Быстрая: 82,
-    'Очень быстрая': 94,
-    'Мне нужна максимальная динамика': 100,
+  if (values.length) {
+    score +=
+      values.reduce(
+        (sum, value) => sum + value,
+        0,
+      ) /
+      values.length /
+      5
   }
 
-  const target =
-    targets[answer] ?? 70
+  // Динамика.
+  const power = answers.power?.[0]
 
-  return Math.max(
-    0,
-    100 -
-      Math.abs(
-        car.scores.performance -
-          target,
-      ),
-  )
-}
+  if (power === 'Спокойная') {
+    score += car.scores.performance >= 70 ? 2 : 8
+  }
 
-function economyScore(car, answer) {
-  if (!answer) return 70
+  if (power === 'Бодрая') {
+    score += car.scores.performance >= 65 ? 7 : 2
+  }
+
+  if (power === 'Быстрая') {
+    score += car.scores.performance >= 80 ? 9 : 2
+  }
+
+  if (power === 'Очень быстрая') {
+    score += car.scores.performance >= 90 ? 10 : 1
+  }
 
   if (
-    answer ===
+    power ===
+    'Мне нужна максимальная динамика'
+  ) {
+    score += car.scores.performance >= 95 ? 10 : 0
+  }
+
+  // Расход.
+  const fuel = answers.fuel?.[0]
+
+  if (
+    fuel ===
     'Очень важен низкий расход'
   ) {
-    return car.scores.economy
+    score += car.scores.economy / 12
   }
 
   if (
-    answer ===
+    fuel ===
     'Желателен умеренный расход'
   ) {
-    return (
-      car.scores.economy * 0.8 +
-      20
-    )
+    score += car.scores.economy / 18
   }
 
   if (
-    answer ===
+    fuel ===
     'Главное — динамика'
   ) {
-    return car.scores.performance
+    score += car.scores.performance / 18
   }
-
-  return 75
-}
-
-function calculateScore(car, answers) {
-  const budget = parseBudget(
-    answers.budget?.[0],
-  )
-
-  const score =
-    budgetScore(car, budget) * 0.35 +
-    priorityScore(car, answers.priority) *
-      0.20 +
-    bodyScore(car, answers.body) * 0.14 +
-    driveScore(car, answers.drive) *
-      0.10 +
-    brandScore(car, answers.brand) *
-      0.08 +
-    performanceScore(
-      car,
-      answers.power?.[0],
-    ) * 0.07 +
-    economyScore(
-      car,
-      answers.fuel?.[0],
-    ) * 0.06
 
   return Math.max(
     0,
-    Math.min(
-      99,
-      Math.round(score),
-    ),
+    Math.min(99, Math.round(score)),
   )
 }
 
 function buildReason(car, answers, score) {
-  const reasons = []
+  const parts = []
 
   if (answers.budget?.[0]) {
-    reasons.push(
-      `бюджет ${answers.budget[0]}`,
+    parts.push(
+      `входит в выбранный бюджет`,
     )
   }
 
-  if (answers.body?.length) {
-    reasons.push(
-      `предпочтительный кузов`,
-    )
-  }
-
-  if (answers.priority?.length) {
-    reasons.push(
-      `ваши ключевые приоритеты`,
+  if (
+    answers.body?.includes(car.body) ||
+    answers.body?.includes('Не имеет значения')
+  ) {
+    parts.push(
+      `соответствует кузову`,
     )
   }
 
   if (answers.drive?.length) {
-    reasons.push(
-      `предпочтительный привод`,
+    parts.push(
+      `учитывает предпочтение по приводу`,
+    )
+  }
+
+  if (answers.priority?.length) {
+    parts.push(
+      `соответствует ключевым приоритетам`,
     )
   }
 
   if (score >= 85) {
-    return `Высокое соответствие: ${reasons.join(', ')}.`
+    return `Высокая совместимость: ${parts.join(', ')}.`
   }
 
   if (score >= 70) {
-    return `Хорошее соответствие: ${reasons.join(', ')}.`
+    return `Хорошая совместимость: ${parts.join(', ')}.`
   }
 
-  return `Частичное соответствие: ${reasons.join(', ')}.`
+  return `Умеренная совместимость: ${parts.join(', ')}.`
 }
 
-export default async function handler(
-  req,
-  res,
-) {
+export default function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({
       error: 'Method not allowed',
@@ -516,13 +569,33 @@ export default async function handler(
       })
     }
 
-    const recommendations = CARS
+    const budget = getBudgetRange(
+      answers.budget?.[0],
+    )
+
+    // Сначала ЖЁСТКО фильтруем по бюджету.
+    const affordableCars = CARS.filter(
+      (car) =>
+        car.priceMin >= budget.min &&
+        car.priceMin <= budget.max,
+    )
+
+    if (!affordableCars.length) {
+      return res.status(200).json({
+        recommendations: [],
+        noMatches: true,
+        message:
+          'В текущей демонстрационной базе нет автомобилей, которые укладываются в выбранный бюджет. Попробуйте увеличить бюджет или изменить параметры.',
+      })
+    }
+
+    const recommendations = affordableCars
       .map((car) => {
-        const score =
-          calculateScore(
-            car,
-            answers,
-          )
+        const score = scoreCar(
+          car,
+          answers,
+          budget,
+        )
 
         return {
           ...car,
@@ -538,6 +611,9 @@ export default async function handler(
             car.buyingFocus,
         }
       })
+      .filter(
+        (car) => car.score >= 0,
+      )
       .sort(
         (a, b) =>
           b.score - a.score,
@@ -546,6 +622,7 @@ export default async function handler(
 
     return res.status(200).json({
       recommendations,
+      noMatches: false,
     })
   } catch (error) {
     console.error(
