@@ -170,10 +170,14 @@ function App() {
           <a href="#services">Услуги</a>
           <a href="#works">Работы</a>
           <a href="#about">О нас</a>
+          <a href="#location">Карта</a>
           <a href="#contacts">Контакты</a>
         </nav>
 
-        <button className="header-button desktop-booking" onClick={openBooking}>
+        <button
+          className="header-button desktop-booking"
+          onClick={openBooking}
+        >
           Записаться
         </button>
 
@@ -181,6 +185,7 @@ function App() {
           className={`menu-button ${mobileMenuOpen ? 'active' : ''}`}
           onClick={toggleMobileMenu}
           aria-label="Открыть меню"
+          aria-expanded={mobileMenuOpen}
         >
           <span></span>
           <span></span>
@@ -190,10 +195,25 @@ function App() {
 
       {mobileMenuOpen && (
         <div className="mobile-menu">
-          <a href="#services" onClick={closeMobileMenu}>Услуги</a>
-          <a href="#works" onClick={closeMobileMenu}>Работы</a>
-          <a href="#about" onClick={closeMobileMenu}>О нас</a>
-          <a href="#contacts" onClick={closeMobileMenu}>Контакты</a>
+          <a href="#services" onClick={closeMobileMenu}>
+            Услуги
+          </a>
+
+          <a href="#works" onClick={closeMobileMenu}>
+            Работы
+          </a>
+
+          <a href="#about" onClick={closeMobileMenu}>
+            О нас
+          </a>
+
+          <a href="#location" onClick={closeMobileMenu}>
+            Карта
+          </a>
+
+          <a href="#contacts" onClick={closeMobileMenu}>
+            Контакты
+          </a>
 
           <button className="primary-button" onClick={openBooking}>
             Записаться →
@@ -202,6 +222,7 @@ function App() {
       )}
 
       <main id="top">
+        {/* HERO */}
         <section className="hero">
           <div className="hero-content reveal">
             <p className="eyebrow">PREMIUM AUTO SERVICE · BAKU</p>
@@ -265,6 +286,7 @@ function App() {
           </div>
         </section>
 
+        {/* SERVICES */}
         <section className="services" id="services">
           <div className="section-heading">
             <p className="eyebrow">ЧТО МЫ ДЕЛАЕМ</p>
@@ -309,6 +331,7 @@ function App() {
           </div>
         </section>
 
+        {/* WORKS */}
         <section className="works" id="works">
           <div className="works-heading">
             <div>
@@ -360,6 +383,7 @@ function App() {
           </div>
         </section>
 
+        {/* TRUST */}
         <section className="trust">
           <div className="trust-heading">
             <p className="eyebrow">ПОЧЕМУ НАМ ДОВЕРЯЮТ</p>
@@ -381,6 +405,7 @@ function App() {
           </div>
         </section>
 
+        {/* ABOUT */}
         <section className="about" id="about">
           <div>
             <p className="eyebrow">AUREN AUTO LAB</p>
@@ -399,6 +424,52 @@ function App() {
           </p>
         </section>
 
+        {/* LOCATION */}
+        <section className="location" id="location">
+          <div className="location-heading">
+            <div>
+              <p className="eyebrow">ГДЕ МЫ</p>
+
+              <h2>
+                Найдите нас
+                <br />
+                <span>в Баку.</span>
+              </h2>
+            </div>
+
+            <div className="location-info">
+              <span>DEMO LOCATION</span>
+
+              <strong>Babək prospekti · Bakı</strong>
+
+              <p>
+                Демонстрационная точка для портфолио.
+                Перед публикацией заменяется на настоящий адрес клиента.
+              </p>
+
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Babek+prospekti+Baku"
+                target="_blank"
+                rel="noreferrer"
+                className="map-button"
+              >
+                Построить маршрут →
+              </a>
+            </div>
+          </div>
+
+          <div className="map-wrapper">
+            <iframe
+              title="AUREN AUTO LAB — Demo Location"
+              src="https://www.google.com/maps?q=Babek+prospekti,+Baku&output=embed"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </section>
+
+        {/* CONTACTS */}
         <section className="contact" id="contacts">
           <p className="eyebrow">КОНТАКТЫ</p>
 
@@ -409,7 +480,11 @@ function App() {
           </h2>
 
           <div className="contact-grid">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer">
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              target="_blank"
+              rel="noreferrer"
+            >
               <span>WhatsApp</span>
               <strong>+994 55 475 00 60</strong>
             </a>
@@ -449,20 +524,27 @@ function App() {
           <span>AUREN</span> AUTO LAB
         </div>
 
-        <p>Premium automotive care · Baku, Azerbaijan · Portfolio Demo</p>
+        <p>
+          Premium automotive care · Baku, Azerbaijan · Portfolio Demo
+        </p>
       </footer>
 
       <button className="mobile-booking" onClick={openBooking}>
         Записаться
       </button>
 
+      {/* BOOKING MODAL */}
       {isBookingOpen && (
         <div className="modal-backdrop" onMouseDown={closeBooking}>
           <div
             className="booking-modal"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <button className="modal-close" onClick={closeBooking}>
+            <button
+              className="modal-close"
+              onClick={closeBooking}
+              aria-label="Закрыть"
+            >
               ×
             </button>
 
@@ -545,13 +627,18 @@ function App() {
         </div>
       )}
 
+      {/* CASE STUDY */}
       {selectedWork && (
         <div className="case-backdrop" onMouseDown={closeWork}>
           <div
             className="case-modal"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <button className="modal-close" onClick={closeWork}>
+            <button
+              className="modal-close"
+              onClick={closeWork}
+              aria-label="Закрыть"
+            >
               ×
             </button>
 

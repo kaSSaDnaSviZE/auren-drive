@@ -1254,3 +1254,134 @@ footer p {
     border-radius: 16px;
   }
 }
+/* LOCATION */
+
+.location {
+  padding: 130px 7%;
+  background: #080808;
+  border-top: 1px solid #151515;
+}
+
+.location-heading {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: 70px;
+  align-items: end;
+  margin-bottom: 50px;
+}
+
+.location-heading h2 {
+  margin: 0;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -3px;
+}
+
+.location-heading h2 span {
+  color: #ff6a00;
+}
+
+.location-info {
+  padding: 28px;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 106, 0, 0.08),
+      transparent 45%
+    ),
+    #111;
+}
+
+.location-info span {
+  display: block;
+  margin-bottom: 10px;
+  color: #ff6a00;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.location-info strong {
+  display: block;
+  margin-bottom: 12px;
+  color: #fff;
+  font-size: 20px;
+}
+
+.location-info p {
+  margin: 0 0 20px;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.map-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  transition: 0.25s ease;
+}
+
+.map-button:hover {
+  border-color: #ff6a00;
+  color: #ff6a00;
+  transform: translateY(-2px);
+}
+
+.map-wrapper {
+  width: 100%;
+  height: 480px;
+  overflow: hidden;
+  border: 1px solid #252525;
+  border-radius: 20px;
+  background: #111;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.45);
+}
+
+.map-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(0.15) contrast(1.05);
+}
+
+@media (max-width: 900px) {
+  .location {
+    padding: 90px 5%;
+  }
+
+  .location-heading {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .map-wrapper {
+    height: 360px;
+  }
+}
+
+@media (max-width: 560px) {
+  .location {
+    padding: 75px 18px;
+  }
+
+  .location-heading h2 {
+    font-size: 40px;
+  }
+
+  .location-info {
+    padding: 22px;
+  }
+
+  .map-wrapper {
+    height: 300px;
+    border-radius: 16px;
+  }
+}
