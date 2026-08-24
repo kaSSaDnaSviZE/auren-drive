@@ -5,117 +5,204 @@ const groq = new Groq({
 })
 
 const SYSTEM_PROMPT = `
-Ты — AUREN DRIVE, профессиональный автомобильный AI-консультант.
+Ты — AUREN DRIVE, автомобильный AI-поисковик.
 
-Твоя задача — провести актуальное веб-исследование и помочь пользователю выбрать автомобиль.
+Ты должен исследовать актуальный автомобильный рынок через web search.
 
-ОБЯЗАТЕЛЬНО:
-- Используй browser search.
-- Ищи актуальную информацию в интернете.
+Задача:
+1. Проанализировать требования пользователя.
+2. Найти актуальные подходящие автомобили.
+3. Выбрать TOP-3.
+4. Для каждого автомобиля найти хотя бы один надежный источник.
+5. По возможности найти страницу с фотографией автомобиля.
+6. По возможности найти конкретное объявление.
+7. Не выдумывать URLs.
+
+ЖЕСТКИЕ ПРАВИЛА:
+- Не придумывай цены.
+- Не придумывай объявления.
+- Не придумывай URL.
+- Не придумывай фото URL.
+- PHOTO_URL можно указывать только если такой URL реально найден в веб-поиске.
+- LISTING_URL можно указывать только если найдено конкретное объявление.
+- Если не найдено — оставь поле пустым.
+- Бюджет пользователя очень важен.
+- Не предлагай автомобиль, который явно сильно дороже бюджета.
 - Учитывай российский рынок.
-- Проверяй актуальные цены, если они доступны.
 - Сравнивай несколько источников.
-- Не придумывай автомобили, цены, комплектации, пробеги или наличие.
-- Бюджет пользователя является жёстким ограничением.
-- Если точных данных нет, честно скажи об этом.
-- Не выдавай свои предположения за факты.
-- Отвечай на языке пользователя.
+- Отвечай на русском.
 
-АНАЛИЗИРУЙ:
-- бюджет;
-- год;
-- кузов;
-- привод;
-- двигатель;
-- мощность;
-- динамику;
-- расход;
-- надёжность;
-- типичные проблемы;
-- обслуживание;
-- ликвидность;
-- комфорт;
-- безопасность;
-- реальные предложения на рынке, если они доступны.
+ОБЯЗАТЕЛЬНЫЙ ФОРМАТ:
 
-РЕЗУЛЬТАТ:
+CAR_1
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+PHOTO_URL: ...
+LISTING_URL: ...
+SOURCE_URL: ...
 
-TOP 3
+CAR_2
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+PHOTO_URL: ...
+LISTING_URL: ...
+SOURCE_URL: ...
 
-1. Автомобиль
-Почему подходит:
-...
+CAR_3
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+PHOTO_URL: ...
+LISTING_URL: ...
+SOURCE_URL: ...
 
-Цена на рынке:
-...
-
-Характеристики:
-...
-
-Плюсы:
-- ...
-- ...
-- ...
-
-Минусы:
-- ...
-- ...
-- ...
-
-Типичные проблемы:
-- ...
-- ...
-- ...
-
-Что проверить перед покупкой:
-- ...
-- ...
-- ...
-
-2. Автомобиль
-...
-
-3. Автомобиль
-...
-
-ЛУЧШИЙ ВАРИАНТ:
-...
-
-ПОЧЕМУ:
-...
-
-ИСТОЧНИКИ:
-Укажи основные сайты и страницы, которые использовал.
-
-Очень важно:
-если пользователь указал бюджет до 2 млн ₽, не предлагай машину за 5 млн ₽ просто потому, что она хорошая.
+BEST: ...
+BEST_REASON: ...
 `
 
 function buildPrompt(answers) {
   return `
-Профиль пользователя:
+ПРОФИЛЬ ПОКУПАТЕЛЯ:
 
 ${JSON.stringify(answers, null, 2)}
 
-Проведи настоящее исследование.
+Исследуй рынок.
 
-Сначала изучи профиль.
-Затем используй browser search для поиска актуальной информации.
-Проверь несколько источников.
-После этого выбери 3 лучших автомобиля.
-
-Особенно внимательно проверь:
+Особенно проверь:
 - соответствие бюджету;
 - актуальные цены;
-- российский рынок;
-- надёжность;
-- типичные проблемы;
+- модель и поколение;
+- двигатель;
+- мощность;
+- привод;
+- тип кузова;
+- надежность;
+- типичные неисправности;
 - стоимость обслуживания;
-- характеристики;
-- плюсы и минусы.
+- реальные предложения.
 
-Не отвечай только из памяти.
+Для каждого из TOP-3 постарайся найти:
+1. страницу с фото;
+2. конкретное объявление;
+3. источник с информацией.
+
+URL НЕ придумывай.
+
+Если реального фото URL нет:
+PHOTO_URL:
+
+Если конкретного объявления нет:
+LISTING_URL:
 `
+}
+
+function extractBlock(text, number) {
+  const regex = new RegExp(
+    `CAR_${number}([\\s\\S]*?)(?=CAR_${number + 1}|BEST:|$)`,
+    'i',
+  )
+
+  const match = text.match(regex)
+
+  return match ? match[1].trim() : ''
+}
+
+function field(block, name) {
+  const regex = new RegExp(
+    `^${name}:\\s*(.*)$`,
+    'im',
+  )
+
+  const match = block.match(regex)
+
+  return match?.[1]?.trim() || ''
+}
+
+function parseResult(text) {
+  const cars = [1, 2, 3]
+    .map((number, index) => {
+      const block = extractBlock(
+        text,
+        number,
+      )
+
+      if (!block) return null
+
+      return {
+        position: index + 1,
+        name: field(block, 'NAME') ||
+          `Автомобиль ${index + 1}`,
+
+        price: field(block, 'PRICE'),
+
+        specs: field(block, 'SPECS'),
+
+        why: field(block, 'WHY'),
+
+        pros: field(block, 'PROS'),
+
+        cons: field(block, 'CONS'),
+
+        problems: field(
+          block,
+          'PROBLEMS',
+        ),
+
+        check: field(
+          block,
+          'CHECK',
+        ),
+
+        photoUrl: field(
+          block,
+          'PHOTO_URL',
+        ),
+
+        listingUrl: field(
+          block,
+          'LISTING_URL',
+        ),
+
+        sourceUrl: field(
+          block,
+          'SOURCE_URL',
+        ),
+      }
+    })
+    .filter(Boolean)
+
+  const bestMatch = text.match(
+    /BEST:\s*(.*)/i,
+  )
+
+  const bestReasonMatch = text.match(
+    /BEST_REASON:\s*([\s\S]*?)$/i,
+  )
+
+  return {
+    cars,
+    best:
+      bestMatch?.[1]?.trim() || '',
+    bestReason:
+      bestReasonMatch?.[1]?.trim() || '',
+  }
 }
 
 export default async function handler(req, res) {
@@ -126,12 +213,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiKey = process.env.GROQ_API_KEY
-
-    if (!apiKey) {
+    if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({
         error:
-          'GROQ_API_KEY is missing in Vercel Environment Variables',
+          'GROQ_API_KEY is missing in Vercel',
       })
     }
 
@@ -158,9 +243,9 @@ export default async function handler(req, res) {
           },
         ],
 
-        temperature: 0.2,
+        temperature: 0.15,
 
-        max_completion_tokens: 3000,
+        max_completion_tokens: 5000,
 
         reasoning_effort: 'low',
 
@@ -183,15 +268,22 @@ export default async function handler(req, res) {
 
     if (!answer) {
       return res.status(502).json({
-        error: 'Groq returned an empty answer',
+        error:
+          'Groq returned an empty result',
       })
     }
 
+    const parsed =
+      parseResult(answer)
+
     return res.status(200).json({
       answer,
-      searched: true,
+      cars: parsed.cars,
+      best: parsed.best,
+      bestReason: parsed.bestReason,
       citations:
         message?.citations || [],
+      searched: true,
     })
   } catch (error) {
     console.error(
@@ -199,19 +291,11 @@ export default async function handler(req, res) {
       error,
     )
 
-    const message =
-      typeof error?.message === 'string'
-        ? error.message
-        : JSON.stringify(error)
-
     return res.status(500).json({
-      error: message,
-      status:
-        error?.status ||
-        error?.statusCode ||
-        null,
-      code: error?.code || null,
-      type: error?.type || null,
+      error:
+        typeof error?.message === 'string'
+          ? error.message
+          : JSON.stringify(error),
     })
   }
 }
