@@ -1,3 +1,123 @@
+import Groq from 'groq-sdk'
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+})
+
+const SYSTEM_PROMPT = `
+Ты — AUREN DRIVE, профессиональный автомобильный AI-консультант.
+
+Твоя задача — провести актуальное веб-исследование и помочь пользователю выбрать автомобиль.
+
+ОБЯЗАТЕЛЬНО:
+- Используй browser search.
+- Ищи актуальную информацию в интернете.
+- Учитывай российский рынок.
+- Проверяй актуальные цены, если они доступны.
+- Сравнивай несколько источников.
+- Не придумывай автомобили, цены, комплектации, пробеги или наличие.
+- Бюджет пользователя является жёстким ограничением.
+- Если точных данных нет, честно скажи об этом.
+- Не выдавай свои предположения за факты.
+- Отвечай на языке пользователя.
+
+АНАЛИЗИРУЙ:
+- бюджет;
+- год;
+- кузов;
+- привод;
+- двигатель;
+- мощность;
+- динамику;
+- расход;
+- надёжность;
+- типичные проблемы;
+- обслуживание;
+- ликвидность;
+- комфорт;
+- безопасность;
+- реальные предложения на рынке, если они доступны.
+
+РЕЗУЛЬТАТ:
+
+TOP 3
+
+1. Автомобиль
+Почему подходит:
+...
+
+Цена на рынке:
+...
+
+Характеристики:
+...
+
+Плюсы:
+- ...
+- ...
+- ...
+
+Минусы:
+- ...
+- ...
+- ...
+
+Типичные проблемы:
+- ...
+- ...
+- ...
+
+Что проверить перед покупкой:
+- ...
+- ...
+- ...
+
+2. Автомобиль
+...
+
+3. Автомобиль
+...
+
+ЛУЧШИЙ ВАРИАНТ:
+...
+
+ПОЧЕМУ:
+...
+
+ИСТОЧНИКИ:
+Укажи основные сайты и страницы, которые использовал.
+
+Очень важно:
+если пользователь указал бюджет до 2 млн ₽, не предлагай машину за 5 млн ₽ просто потому, что она хорошая.
+`
+
+function buildPrompt(answers) {
+  return `
+Профиль пользователя:
+
+${JSON.stringify(answers, null, 2)}
+
+Проведи настоящее исследование.
+
+Сначала изучи профиль.
+Затем используй browser search для поиска актуальной информации.
+Проверь несколько источников.
+После этого выбери 3 лучших автомобиля.
+
+Особенно внимательно проверь:
+- соответствие бюджету;
+- актуальные цены;
+- российский рынок;
+- надёжность;
+- типичные проблемы;
+- стоимость обслуживания;
+- характеристики;
+- плюсы и минусы.
+
+Не отвечай только из памяти.
+`
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -17,123 +137,44 @@ export default async function handler(req, res) {
 
     const { answers } = req.body || {}
 
-    if (
-      !answers ||
-      typeof answers !== 'object'
-    ) {
+    if (!answers || typeof answers !== 'object') {
       return res.status(400).json({
         error: 'Answers are required',
       })
     }
 
-    const prompt = `
-Пользователь хочет подобрать автомобиль.
+    const completion =
+      await groq.chat.completions.create({
+        model: 'openai/gpt-oss-20b',
 
-Его ответы:
-${JSON.stringify(answers)}
+        messages: [
+          {
+            role: 'system',
+            content: SYSTEM_PROMPT,
+          },
+          {
+            role: 'user',
+            content: buildPrompt(answers),
+          },
+        ],
 
-Проведи актуальное исследование автомобильного рынка.
+        temperature: 0.2,
 
-Используй веб-поиск.
+        max_completion_tokens: 3000,
 
-Учитывай:
-- бюджет;
-- кузов;
-- привод;
-- любимые марки;
-- динамику;
-- расход;
-- надёжность;
-- комфорт;
-- стоимость обслуживания;
-- типичные проблемы;
-- актуальные цены.
+        reasoning_effort: 'low',
 
-Не придумывай цены и наличие.
+        tool_choice: 'required',
 
-Не предлагай автомобили, которые сильно выходят за указанный бюджет.
-
-Выбери TOP-3 самых подходящих вариантов.
-
-Для каждого дай:
-Название
-Почему подходит
-Ориентир цены
-Характеристики
-Плюсы
-Минусы
-Типичные проблемы
-Что проверить перед покупкой
-
-В конце укажи лучший вариант и почему.
-
-Укажи источники, которые использовал.
-`
-
-    const response = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'groq/compound',
-
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Ты AUREN DRIVE — автомобильный AI-консультант, который использует веб-поиск для актуальной информации.',
-            },
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-
-          temperature: 0.2,
-
-          max_completion_tokens: 2500,
-        }),
-      },
-    )
-
-    const raw = await response.text()
-
-    let data = {}
-
-    try {
-      data = raw
-        ? JSON.parse(raw)
-        : {}
-    } catch {
-      return res.status(502).json({
-        error:
-          `Groq returned invalid JSON: ${raw.slice(
-            0,
-            500,
-          )}`,
+        tools: [
+          {
+            type: 'browser_search',
+          },
+        ],
       })
-    }
-
-    if (!response.ok) {
-      console.error(
-        'GROQ ERROR:',
-        data,
-      )
-
-      return res.status(502).json({
-        error:
-          data?.error?.message ||
-          data?.error ||
-          `Groq API error ${response.status}`,
-      })
-    }
 
     const message =
-      data?.choices?.[0]?.message
+      completion?.choices?.[0]?.message
 
     const answer =
       typeof message?.content === 'string'
@@ -142,21 +183,15 @@ ${JSON.stringify(answers)}
 
     if (!answer) {
       return res.status(502).json({
-        error:
-          'Groq returned an empty response',
+        error: 'Groq returned an empty answer',
       })
     }
 
     return res.status(200).json({
       answer,
-      searched:
-        Array.isArray(
-          message?.executed_tools,
-        )
-          ? message.executed_tools.length > 0
-          : false,
-      executed_tools:
-        message?.executed_tools || [],
+      searched: true,
+      citations:
+        message?.citations || [],
     })
   } catch (error) {
     console.error(
@@ -164,10 +199,19 @@ ${JSON.stringify(answers)}
       error,
     )
 
+    const message =
+      typeof error?.message === 'string'
+        ? error.message
+        : JSON.stringify(error)
+
     return res.status(500).json({
-      error:
-        error?.message ||
-        'Unknown server error',
+      error: message,
+      status:
+        error?.status ||
+        error?.statusCode ||
+        null,
+      code: error?.code || null,
+      type: error?.type || null,
     })
   }
 }
