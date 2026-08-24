@@ -4,49 +4,6 @@ import porscheImg from './assets/porsche.jpg'
 
 const WHATSAPP_NUMBER = '994XXXXXXXXX'
 
-const works = [
-  {
-    number: '01',
-    title: 'Porsche 911',
-    category: 'Полировка кузова',
-    image: porscheImg,
-    description:
-      'Восстановление блеска кузова, удаление мелких царапин и финишная полировка.',
-    result: 'Глубокий блеск',
-    time: '1 день',
-  },
-  {
-    number: '02',
-    title: 'Porsche 911',
-    category: 'Premium Detailing',
-    image: porscheImg,
-    description:
-      'Комплексный детейлинг кузова и салона с профессиональной очисткой всех поверхностей.',
-    result: 'Full Detailing',
-    time: '6 часов',
-  },
-  {
-    number: '03',
-    title: 'Porsche 911',
-    category: 'Керамическое покрытие',
-    image: porscheImg,
-    description:
-      'Защитное покрытие кузова с гидрофобным эффектом и дополнительной глубиной цвета.',
-    result: 'Защита кузова',
-    time: '2 дня',
-  },
-  {
-    number: '04',
-    title: 'Porsche 911',
-    category: 'Full Refresh',
-    image: porscheImg,
-    description:
-      'Полное визуальное восстановление автомобиля перед продажей, мероприятием или поездкой.',
-    result: 'Full Refresh',
-    time: '1–2 дня',
-  },
-]
-
 const services = [
   {
     number: '01',
@@ -71,28 +28,72 @@ const services = [
   },
 ]
 
+const works = [
+  {
+    number: '01',
+    title: 'Porsche 911',
+    category: 'Полировка кузова',
+    image: porscheImg,
+    description:
+      'Восстановление блеска кузова, удаление мелких царапин и финишная полировка.',
+    result: 'Глубокий блеск',
+    time: '1 день',
+  },
+  {
+    number: '02',
+    title: 'Porsche 911',
+    category: 'Premium Detailing',
+    image: porscheImg,
+    description:
+      'Комплексный уход за кузовом и салоном с профессиональной очисткой поверхностей.',
+    result: 'Full Detailing',
+    time: '6 часов',
+  },
+  {
+    number: '03',
+    title: 'Porsche 911',
+    category: 'Керамическое покрытие',
+    image: porscheImg,
+    description:
+      'Защитное покрытие кузова с гидрофобным эффектом и дополнительной глубиной цвета.',
+    result: 'Защита кузова',
+    time: '2 дня',
+  },
+  {
+    number: '04',
+    title: 'Porsche 911',
+    category: 'Full Refresh',
+    image: porscheImg,
+    description:
+      'Полное визуальное восстановление автомобиля перед продажей или важным событием.',
+    result: 'Full Refresh',
+    time: '1–2 дня',
+  },
+]
+
 const trustItems = [
   {
-    value: '7+',
-    label: 'лет опыта',
+    value: 'PREMIUM',
+    label: 'уровень сервиса',
   },
   {
-    value: '1 200+',
-    label: 'автомобилей',
+    value: 'INDIVIDUAL',
+    label: 'подход к каждому авто',
   },
   {
-    value: '4.9/5',
-    label: 'оценка клиентов',
+    value: 'BAKU',
+    label: 'локация сервиса',
   },
   {
-    value: '12 мес.',
-    label: 'защита покрытия',
+    value: '24/7',
+    label: 'приём заявок онлайн',
   },
 ]
 
 function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [selectedWork, setSelectedWork] = useState(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [comparison, setComparison] = useState(50)
 
   const [form, setForm] = useState({
@@ -104,6 +105,7 @@ function App() {
   })
 
   const openBooking = () => {
+    setMobileMenuOpen(false)
     setIsBookingOpen(true)
   }
 
@@ -118,6 +120,10 @@ function App() {
 
   const closeWork = () => {
     setSelectedWork(null)
+  }
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((previous) => !previous)
   }
 
   const handleChange = (event) => {
@@ -149,26 +155,66 @@ function App() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+  }
+
   return (
     <div className="site">
       <header className="header">
-        <a href="#top" className="logo">
+        <a href="#top" className="logo" onClick={closeMobileMenu}>
           <span>BAKU</span> AUTO LAB
         </a>
 
-        <nav>
+        <nav className="desktop-nav">
           <a href="#services">Услуги</a>
           <a href="#works">Работы</a>
           <a href="#about">О нас</a>
           <a href="#contacts">Контакты</a>
         </nav>
 
-        <button className="header-button" onClick={openBooking}>
+        <button className="header-button desktop-booking" onClick={openBooking}>
           Записаться
+        </button>
+
+        <button
+          className={`menu-button ${mobileMenuOpen ? 'active' : ''}`}
+          onClick={toggleMobileMenu}
+          aria-label="Открыть меню"
+          aria-expanded={mobileMenuOpen}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
       </header>
 
+      {mobileMenuOpen && (
+        <div className="mobile-menu">
+          <a href="#services" onClick={closeMobileMenu}>
+            Услуги
+          </a>
+
+          <a href="#works" onClick={closeMobileMenu}>
+            Работы
+          </a>
+
+          <a href="#about" onClick={closeMobileMenu}>
+            О нас
+          </a>
+
+          <a href="#contacts" onClick={closeMobileMenu}>
+            Контакты
+          </a>
+
+          <button className="primary-button" onClick={openBooking}>
+            Записаться →
+          </button>
+        </div>
+      )}
+
       <main id="top">
+        {/* HERO */}
         <section className="hero">
           <div className="hero-content reveal">
             <p className="eyebrow">PREMIUM AUTO SERVICE · BAKU</p>
@@ -198,18 +244,18 @@ function App() {
 
             <div className="stats">
               <div>
-                <strong>7+</strong>
-                <span>лет опыта</span>
+                <strong>PREMIUM</strong>
+                <span>уровень сервиса</span>
               </div>
 
               <div>
-                <strong>1 200+</strong>
-                <span>автомобилей</span>
+                <strong>BAKU</strong>
+                <span>локация</span>
               </div>
 
               <div>
-                <strong>4.9</strong>
-                <span>рейтинг клиентов</span>
+                <strong>24/7</strong>
+                <span>приём заявок</span>
               </div>
             </div>
           </div>
@@ -232,6 +278,7 @@ function App() {
           </div>
         </section>
 
+        {/* SERVICES */}
         <section className="services" id="services">
           <div className="section-heading">
             <p className="eyebrow">ЧТО МЫ ДЕЛАЕМ</p>
@@ -276,6 +323,7 @@ function App() {
           </div>
         </section>
 
+        {/* WORKS */}
         <section className="works" id="works">
           <div className="works-heading">
             <div>
@@ -320,13 +368,14 @@ function App() {
           <div className="demo-note">
             <span>DEMO PROJECT</span>
             <p>
-              Сейчас используются демонстрационные изображения. Перед
-              публикацией для реального клиента заменим их на настоящие
-              фотографии его автомобилей.
+              Сейчас используются демонстрационные изображения. Для
+              реального клиента сюда добавляются его автомобили и настоящие
+              результаты работ.
             </p>
           </div>
         </section>
 
+        {/* TRUST */}
         <section className="trust">
           <div className="trust-heading">
             <p className="eyebrow">ПОЧЕМУ НАМ ДОВЕРЯЮТ</p>
@@ -348,6 +397,7 @@ function App() {
           </div>
         </section>
 
+        {/* ABOUT */}
         <section className="about" id="about">
           <div>
             <p className="eyebrow">BAKU AUTO LAB</p>
@@ -366,6 +416,7 @@ function App() {
           </p>
         </section>
 
+        {/* CONTACT */}
         <section className="contact" id="contacts">
           <p className="eyebrow">ГОТОВЫ НАЧАТЬ?</p>
 
@@ -374,6 +425,10 @@ function App() {
             <br />
             <span>автомобилю блеск.</span>
           </h2>
+
+          <p className="contact-text">
+            Оставьте заявку, и мы свяжемся с вами для уточнения деталей.
+          </p>
 
           <button className="primary-button" onClick={openBooking}>
             Записаться на сервис →
@@ -389,10 +444,7 @@ function App() {
         <p>Premium automotive care · Baku, Azerbaijan</p>
       </footer>
 
-      <button className="mobile-booking" onClick={openBooking}>
-        Записаться
-      </button>
-
+      {/* BOOKING */}
       {isBookingOpen && (
         <div className="modal-backdrop" onMouseDown={closeBooking}>
           <div
@@ -482,6 +534,7 @@ function App() {
         </div>
       )}
 
+      {/* CASE STUDY */}
       {selectedWork && (
         <div className="case-backdrop" onMouseDown={closeWork}>
           <div
