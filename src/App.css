@@ -1174,3 +1174,83 @@ footer p {
     min-height: 105px;
   }
 }
+@media (max-width: 560px) {
+  .header {
+    padding: 0 18px;
+  }
+
+  .logo {
+    font-size: 15px;
+  }
+
+  .hero {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .services,
+  .works,
+  .trust,
+  .about,
+  .contact {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .hero h1 {
+    font-size: 48px;
+    line-height: 0.98;
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  .hero-buttons {
+    gap: 10px;
+  }
+
+  .hero-buttons .primary-button,
+  .hero-buttons .secondary-button {
+    width: 100%;
+  }
+
+  .stats {
+    margin-top: 30px;
+  }
+
+  .car-image-wrapper {
+    height: 300px;
+  }
+
+  .section-heading h2,
+  .works-heading h2,
+  .trust-heading h2,
+  .about h2,
+  .contact h2 {
+    font-size: 40px;
+  }
+
+  .service-card {
+    padding: 28px;
+  }
+
+  .work-card {
+    height: 280px;
+  }
+
+  .contact-grid {
+    gap: 10px;
+  }
+
+  .contact-grid > * {
+    padding: 20px;
+  }
+
+  .booking-modal,
+  .case-modal {
+    width: 100%;
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+}
