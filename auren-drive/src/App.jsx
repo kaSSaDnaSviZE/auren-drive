@@ -1,13 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 const questions = [
   {
     id: 'budget',
-    eyebrow: '01 / 08',
     title: 'Какой у вас бюджет?',
-    description: 'Укажите комфортный бюджет на покупку автомобиля.',
-    type: 'choice',
     options: [
       'До 1 млн ₽',
       '1–2 млн ₽',
@@ -19,10 +16,7 @@ const questions = [
   },
   {
     id: 'condition',
-    eyebrow: '02 / 08',
     title: 'Какой автомобиль вы рассматриваете?',
-    description: 'Новый, почти новый или автомобиль с пробегом?',
-    type: 'choice',
     options: [
       'Новый',
       'Б/у до 3 лет',
@@ -33,10 +27,8 @@ const questions = [
   },
   {
     id: 'body',
-    eyebrow: '03 / 08',
     title: 'Какой кузов вам нравится?',
-    description: 'Выберите подходящий формат.',
-    type: 'multi',
+    multi: true,
     options: [
       'Седан',
       'Лифтбек',
@@ -49,10 +41,8 @@ const questions = [
   },
   {
     id: 'priority',
-    eyebrow: '04 / 08',
     title: 'Что для вас важнее всего?',
-    description: 'Можно выбрать несколько приоритетов.',
-    type: 'multi',
+    multi: true,
     options: [
       'Динамика',
       'Комфорт',
@@ -61,15 +51,11 @@ const questions = [
       'Имидж',
       'Проходимость',
       'Дешёвое обслуживание',
-      'Технологичность',
     ],
   },
   {
     id: 'power',
-    eyebrow: '05 / 08',
     title: 'Какую динамику вы хотите?',
-    description: 'От спокойной езды до performance.',
-    type: 'choice',
     options: [
       'Спокойная',
       'Бодрая',
@@ -80,10 +66,8 @@ const questions = [
   },
   {
     id: 'drive',
-    eyebrow: '06 / 08',
-    title: 'Какой привод предпочтительнее?',
-    description: 'Можно выбрать несколько.',
-    type: 'multi',
+    title: 'Какой привод предпочитаете?',
+    multi: true,
     options: [
       'Передний',
       'Задний',
@@ -93,10 +77,7 @@ const questions = [
   },
   {
     id: 'fuel',
-    eyebrow: '07 / 08',
-    title: 'Как относитесь к расходу топлива?',
-    description: 'Это поможет точнее подобрать автомобиль.',
-    type: 'choice',
+    title: 'Как относитесь к расходу?',
     options: [
       'Очень важен низкий расход',
       'Желателен умеренный расход',
@@ -106,10 +87,8 @@ const questions = [
   },
   {
     id: 'brand',
-    eyebrow: '08 / 08',
     title: 'Есть любимые марки?',
-    description: 'Можно выбрать несколько.',
-    type: 'multi',
+    multi: true,
     options: [
       'BMW',
       'Mercedes-Benz',
@@ -123,513 +102,383 @@ const questions = [
   },
 ]
 
-const cars = [
-  {
-    id: 'bmw-m340i',
-    brand: 'BMW',
-    name: 'BMW M340i xDrive',
-    priceMin: 3000000,
-    priceMax: 4000000,
-    price: '3.0–4.0 млн ₽',
-    power: '374 л.с.',
-    drive: 'AWD',
-    body: 'Седан',
-    image:
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=85',
-    tags: ['Динамика', 'Комфорт', 'AWD'],
-    scores: {
-      performance: 95,
-      comfort: 88,
-      reliability: 84,
-      economy: 65,
-      image: 90,
-      offroad: 20,
-      maintenance: 62,
-    },
-    pros: [
-      'Сильная динамика',
-      'Хороший баланс комфорта и управляемости',
-      'Полный привод',
-      'Подходит для ежедневной эксплуатации',
-    ],
-    cons: [
-      'Обслуживание выше среднего',
-      'Хорошие экземпляры стоят дорого',
-    ],
-    buyingFocus:
-      'Проверить историю обслуживания, двигатель, охлаждение, коробку, полный привод и кузов.',
-  },
+function App() {
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [results, setResults] = useState(null)
+  const [error, setError] = useState('')
 
-  {
-    id: 'mercedes-e53',
-    brand: 'Mercedes-Benz',
-    name: 'Mercedes-AMG E53',
-    priceMin: 4000000,
-    priceMax: 5500000,
-    price: '4.0–5.5 млн ₽',
-    power: '435 л.с.',
-    drive: 'AWD',
-    body: 'Седан',
-    image:
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=85',
-    tags: ['Комфорт', 'Динамика', 'Premium'],
-    scores: {
-      performance: 91,
-      comfort: 96,
-      reliability: 78,
-      economy: 58,
-      image: 94,
-      offroad: 15,
-      maintenance: 52,
-    },
-    pros: [
-      'Очень высокий уровень комфорта',
-      'Сильная динамика',
-      'Премиальный салон',
-      'Отличен для трассы',
-    ],
-    cons: [
-      'Сложная силовая установка',
-      'Стоимость содержания выше средней',
-    ],
-    buyingFocus:
-      'Проверить силовую установку, электронику, подвеску, коробку и историю обслуживания.',
-  },
+  const question = questions[step]
+  const selected = answers[question.id] || []
 
-  {
-    id: 'porsche-panamera',
-    brand: 'Porsche',
-    name: 'Porsche Panamera 4S',
-    priceMin: 5000000,
-    priceMax: 7000000,
-    price: '5.0–7.0 млн ₽',
-    power: '440 л.с.',
-    drive: 'AWD',
-    body: 'Лифтбек',
-    image:
-      'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1200&q=85',
-    tags: ['Luxury', 'Динамика', 'AWD'],
-    scores: {
-      performance: 96,
-      comfort: 94,
-      reliability: 80,
-      economy: 45,
-      image: 98,
-      offroad: 10,
-      maintenance: 40,
-    },
-    pros: [
-      'Сочетание спорта и комфорта',
-      'Отличная управляемость',
-      'Премиальный интерьер',
-      'Высокий статус',
-    ],
-    cons: [
-      'Дорогое обслуживание',
-      'Требует очень тщательной проверки',
-    ],
-    buyingFocus:
-      'Проверить историю, двигатель, коробку, подвеску и электронику.',
-  },
+  const choose = (option) => {
+    setError('')
 
-  {
-    id: 'audi-s6',
-    brand: 'Audi',
-    name: 'Audi S6',
-    priceMin: 3000000,
-    priceMax: 4500000,
-    price: '3.0–4.5 млн ₽',
-    power: '450 л.с.',
-    drive: 'AWD',
-    body: 'Седан',
-    image:
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1200&q=85',
-    tags: ['Комфорт', 'AWD', 'Performance'],
-    scores: {
-      performance: 93,
-      comfort: 91,
-      reliability: 76,
-      economy: 55,
-      image: 87,
-      offroad: 15,
-      maintenance: 55,
-    },
-    pros: [
-      'Высокая динамика',
-      'Полный привод',
-      'Комфортный салон',
-      'Подходит для трассы',
-    ],
-    cons: [
-      'Сложная электроника',
-      'Не самое дешёвое обслуживание',
-    ],
-    buyingFocus:
-      'Проверить двигатель, коробку, электронику, подвеску и историю обслуживания.',
-  },
-
-  {
-    id: 'lexus-es',
-    brand: 'Lexus',
-    name: 'Lexus ES',
-    priceMin: 3000000,
-    priceMax: 4500000,
-    price: '3.0–4.5 млн ₽',
-    power: '249 л.с.',
-    drive: 'FWD',
-    body: 'Седан',
-    image:
-      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=85',
-    tags: ['Комфорт', 'Надёжность', 'Business'],
-    scores: {
-      performance: 65,
-      comfort: 94,
-      reliability: 95,
-      economy: 78,
-      image: 83,
-      offroad: 10,
-      maintenance: 86,
-    },
-    pros: [
-      'Высокий комфорт',
-      'Хорошая репутация по надёжности',
-      'Подходит для ежедневной эксплуатации',
-      'Предсказуемое содержание',
-    ],
-    cons: [
-      'Не спортивный характер',
-      'Передний привод',
-    ],
-    buyingFocus:
-      'Проверить кузов, историю обслуживания, подвеску и электронику.',
-  },
-
-  {
-    id: 'land-cruiser',
-    brand: 'Toyota',
-    name: 'Toyota Land Cruiser',
-    priceMin: 6000000,
-    priceMax: 10000000,
-    price: '6.0–10.0 млн ₽',
-    power: '300+ л.с.',
-    drive: 'AWD',
-    body: 'SUV',
-    image:
-      'https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=1200&q=85',
-    tags: ['SUV', 'AWD', 'Надёжность'],
-    scores: {
-      performance: 72,
-      comfort: 91,
-      reliability: 96,
-      economy: 40,
-      image: 94,
-      offroad: 100,
-      maintenance: 80,
-    },
-    pros: [
-      'Отличная проходимость',
-      'Высокая практичность',
-      'Хорошая ликвидность',
-      'Подходит для плохих дорог',
-    ],
-    cons: [
-      'Высокий расход',
-      'Высокая стоимость покупки',
-    ],
-    buyingFocus:
-      'Проверить раму, трансмиссию, подвеску и историю эксплуатации.',
-  },
-]
-
-function parseBudget(value) {
-  if (value === 'До 1 млн ₽') {
-    return { min: 0, max: 1000000 }
-  }
-
-  if (value === '1–2 млн ₽') {
-    return { min: 1000000, max: 2000000 }
-  }
-
-  if (value === '2–3 млн ₽') {
-    return { min: 2000000, max: 3000000 }
-  }
-
-  if (value === '3–5 млн ₽') {
-    return { min: 3000000, max: 5000000 }
-  }
-
-  if (value === '5–10 млн ₽') {
-    return { min: 5000000, max: 10000000 }
-  }
-
-  if (value === '10+ млн ₽') {
-    return { min: 10000000, max: Infinity }
-  }
-
-  return { min: 0, max: Infinity }
-}
-
-function budgetScore(car, budget) {
-  if (
-    car.priceMin >= budget.min &&
-    car.priceMax <= budget.max
-  ) {
-    return 100
-  }
-
-  if (
-    car.priceMin <= budget.max &&
-    car.priceMax >= budget.min
-  ) {
-    return 60
-  }
-
-  if (car.priceMin > budget.max) {
-    return 0
-  }
-
-  return 20
-}
-
-function bodyScore(car, answers) {
-  const body = answers.body || []
-
-  if (!body.length || body.includes('Не имеет значения')) {
-    return 75
-  }
-
-  if (body.includes(car.body)) {
-    return 100
-  }
-
-  return 0
-}
-
-function driveScore(car, answers) {
-  const drive = answers.drive || []
-
-  if (!drive.length || drive.includes('Не имеет значения')) {
-    return 75
-  }
-
-  if (drive.includes('Полный') && car.drive === 'AWD') {
-    return 100
-  }
-
-  if (drive.includes('Передний') && car.drive === 'FWD') {
-    return 100
-  }
-
-  if (drive.includes('Задний') && car.drive === 'RWD') {
-    return 100
-  }
-
-  return 0
-}
-
-function brandScore(car, answers) {
-  const brands = answers.brand || []
-
-  if (!brands.length || brands.includes('Любая марка')) {
-    return 75
-  }
-
-  if (
-    brands.includes('Porsche / BMW / Mercedes') &&
-    ['Porsche', 'BMW', 'Mercedes-Benz'].includes(car.brand)
-  ) {
-    return 100
-  }
-
-  if (brands.includes(car.brand)) {
-    return 100
-  }
-
-  return 0
-}
-
-function priorityScore(car, answers) {
-  const priorities = answers.priority || []
-
-  if (!priorities.length) {
-    return 70
-  }
-
-  const map = {
-    Динамика: 'performance',
-    Комфорт: 'comfort',
-    Надёжность: 'reliability',
-    Экономичность: 'economy',
-    Имидж: 'image',
-    Проходимость: 'offroad',
-    'Дешёвое обслуживание': 'maintenance',
-  }
-
-  const values = priorities
-    .map((item) => map[item])
-    .filter(Boolean)
-    .map((key) => car.scores[key])
-
-  if (!values.length) {
-    return 70
-  }
-
-  return values.reduce(
-    (sum, value) => sum + value,
-    0,
-  ) / values.length
-}
-
-function powerScore(car, answer) {
-  if (!answer) {
-    return 70
-  }
-
-  const target = {
-    Спокойная: 45,
-    Бодрая: 65,
-    Быстрая: 82,
-    'Очень быстрая': 94,
-    'Мне нужна максимальная динамика': 100,
-  }[answer]
-
-  if (!target) {
-    return 70
-  }
-
-  return Math.max(
-    0,
-    100 -
-      Math.abs(
-        car.scores.performance - target,
-      ),
-  )
-}
-
-function economyScore(car, answer) {
-  if (!answer) {
-    return 70
-  }
-
-  if (answer === 'Очень важен низкий расход') {
-    return car.scores.economy
-  }
-
-  if (answer === 'Желателен умеренный расход') {
-    return car.scores.economy * 0.8 + 20
-  }
-
-  if (answer === 'Главное — динамика') {
-    return car.scores.performance
-  }
-
-  return 75
-}
-
-function calculateScore(car, answers) {
-  const budget = parseBudget(
-    answers.budget?.[0],
-  )
-
-  const score =
-    budgetScore(car, budget) * 0.38 +
-    priorityScore(car, answers) * 0.20 +
-    bodyScore(car, answers) * 0.12 +
-    driveScore(car, answers) * 0.10 +
-    brandScore(car, answers) * 0.08 +
-    powerScore(car, answers.power?.[0]) * 0.06 +
-    economyScore(car, answers.fuel?.[0]) * 0.06
-
-  return Math.round(
-    Math.max(0, Math.min(99, score)),
-  )
-}
-
-function buildReason(car, answers, score) {
-  const reasons = []
-
-  if (answers.budget?.[0]) {
-    reasons.push(`бюджет ${answers.budget[0]}`)
-  }
-
-  if (answers.body?.length) {
-    reasons.push('тип кузова')
-  }
-
-  if (answers.priority?.length) {
-    reasons.push('ключевые приоритеты')
-  }
-
-  if (answers.drive?.length) {
-    reasons.push('привод')
-  }
-
-  if (answers.brand?.length) {
-    reasons.push('предпочтения по бренду')
-  }
-
-  if (score >= 85) {
-    return `Очень высокая совместимость: учтены ${reasons.join(', ')}.`
-  }
-
-  if (score >= 70) {
-    return `Хорошая совместимость: учтены ${reasons.join(', ')}.`
-  }
-
-  return `Ограниченная совместимость: учтены ${reasons.join(', ')}.`
-}
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      error: 'Method not allowed',
-    })
-  }
-
-  try {
-    const { answers } = req.body || {}
-
-    if (!answers || typeof answers !== 'object') {
-      return res.status(400).json({
-        error: 'Answers are required',
-      })
+    if (!question.multi) {
+      setAnswers((prev) => ({
+        ...prev,
+        [question.id]: [option],
+      }))
+      return
     }
 
-    const recommendations = cars
-      .map((car) => {
-        const score = calculateScore(
-          car,
-          answers,
-        )
+    setAnswers((prev) => {
+      const current = prev[question.id] || []
 
+      if (current.includes(option)) {
         return {
-          ...car,
-          type: car.body,
-          score,
-          match_score: score,
-          why: buildReason(
-            car,
-            answers,
-            score,
+          ...prev,
+          [question.id]: current.filter(
+            (item) => item !== option,
           ),
-          buying_focus: car.buyingFocus,
         }
-      })
-      .sort(
-        (a, b) => b.score - a.score,
-      )
-      .slice(0, 3)
+      }
 
-    return res.status(200).json({
-      recommendations,
-    })
-  } catch (error) {
-    console.error('AUREN DRIVE ERROR:', error)
-
-    return res.status(500).json({
-      error:
-        error?.message ||
-        'Recommendation request failed',
+      return {
+        ...prev,
+        [question.id]: [...current, option],
+      }
     })
   }
+
+  const next = async () => {
+    if (!selected.length || loading) {
+      return
+    }
+
+    const newAnswers = {
+      ...answers,
+      [question.id]: selected,
+    }
+
+    setAnswers(newAnswers)
+
+    if (step < questions.length - 1) {
+      setStep((value) => value + 1)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answers: newAnswers,
+        }),
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        throw new Error(
+          `API ${response.status}: ${text}`,
+        )
+      }
+
+      const data = await response.json()
+
+      if (
+        !Array.isArray(data.recommendations) ||
+        data.recommendations.length === 0
+      ) {
+        throw new Error(
+          'API не вернул рекомендации',
+        )
+      }
+
+      setResults(data.recommendations)
+    } catch (err) {
+      console.error('AUREN DRIVE:', err)
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const back = () => {
+    if (loading) return
+
+    if (step > 0) {
+      setStep((value) => value - 1)
+    }
+  }
+
+  const restart = () => {
+    setStep(0)
+    setAnswers({})
+    setResults(null)
+    setError('')
+  }
+
+  if (results) {
+    return (
+      <div className="drive-app">
+        <header className="drive-header">
+          <div className="drive-logo">
+            <span>AUREN</span> DRIVE
+          </div>
+
+          <button
+            className="restart-button"
+            onClick={restart}
+          >
+            Новый подбор
+          </button>
+        </header>
+
+        <main className="results-page">
+          <div className="landing-eyebrow">
+            AUREN AI · RESULT
+          </div>
+
+          <h1>
+            Ваши лучшие
+            <br />
+            варианты.
+          </h1>
+
+          <div className="results-list">
+            {results.map((car, index) => (
+              <article
+                className="result-card"
+                key={car.id || car.name}
+              >
+                <div className="result-image">
+                  {car.image && (
+                    <img
+                      src={car.image}
+                      alt={car.name}
+                    />
+                  )}
+
+                  <div className="match-badge">
+                    {car.match_score ?? car.score ?? 0}
+                    % MATCH
+                  </div>
+                </div>
+
+                <div className="result-content">
+                  <div className="result-meta">
+                    <span>
+                      0{index + 1}
+                    </span>
+
+                    <span>
+                      {car.body}
+                    </span>
+
+                    <span>
+                      {car.drive}
+                    </span>
+
+                    <span>
+                      {car.power}
+                    </span>
+                  </div>
+
+                  <h2>{car.name}</h2>
+
+                  <p className="result-price">
+                    {car.price}
+                  </p>
+
+                  <p className="result-why">
+                    {car.why}
+                  </p>
+
+                  <div className="result-columns">
+                    <div>
+                      <h4>Плюсы</h4>
+
+                      <ul>
+                        {(car.pros || []).map(
+                          (item) => (
+                            <li key={item}>
+                              {item}
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4>Минусы</h4>
+
+                      <ul>
+                        {(car.cons || []).map(
+                          (item) => (
+                            <li key={item}>
+                              {item}
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="buying-focus">
+                    <span>
+                      НА ЧТО СМОТРЕТЬ
+                    </span>
+
+                    <p>
+                      {car.buying_focus}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <button
+            className="drive-primary"
+            onClick={restart}
+          >
+            Новый подбор →
+          </button>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="drive-app">
+      <header className="drive-header">
+        <div className="drive-logo">
+          <span>AUREN</span> DRIVE
+        </div>
+
+        <div className="progress-wrap">
+          <span>
+            {String(step + 1).padStart(2, '0')} / 08
+          </span>
+
+          <div className="progress-bar">
+            <div
+              style={{
+                width: `${((step + 1) / 8) * 100}%`,
+              }}
+            />
+          </div>
+        </div>
+      </header>
+
+      <main className="question-page">
+        <section className="question-content">
+          <div className="landing-eyebrow">
+            AUREN DRIVE
+          </div>
+
+          <h1>{question.title}</h1>
+
+          <div className="options-grid">
+            {question.options.map(
+              (option) => {
+                const isSelected =
+                  selected.includes(option)
+
+                return (
+                  <button
+                    key={option}
+                    className={`option-card ${
+                      isSelected
+                        ? 'selected'
+                        : ''
+                    }`}
+                    onClick={() =>
+                      choose(option)
+                    }
+                  >
+                    <strong>
+                      {option}
+                    </strong>
+
+                    <span>
+                      {isSelected
+                        ? '✓'
+                        : '→'}
+                    </span>
+                  </button>
+                )
+              },
+            )}
+          </div>
+
+          {error && (
+            <div className="ai-error">
+              <strong>
+                AUREN DRIVE ERROR
+              </strong>
+
+              <p>{error}</p>
+
+              <small>
+                Проверьте Vercel → Logs.
+              </small>
+            </div>
+          )}
+
+          {loading && (
+            <div className="ai-processing">
+              AUREN анализирует ваши
+              предпочтения...
+            </div>
+          )}
+
+          <div className="question-actions">
+            <button
+              className="back-button"
+              onClick={back}
+              disabled={
+                step === 0 || loading
+              }
+            >
+              ← Назад
+            </button>
+
+            <button
+              className="drive-primary"
+              onClick={next}
+              disabled={
+                !selected.length ||
+                loading
+              }
+            >
+              {loading
+                ? 'Анализируем...'
+                : step ===
+                    questions.length - 1
+                  ? 'Получить рекомендации'
+                  : 'Продолжить'}
+
+              <span>→</span>
+            </button>
+          </div>
+        </section>
+
+        <aside className="question-side">
+          <div className="side-label">
+            AI VEHICLE MATCHING
+          </div>
+
+          <div className="side-big-number">
+            {String(step + 1).padStart(2, '0')}
+          </div>
+
+          <p>
+            Ответьте на несколько вопросов,
+            и AUREN подберёт подходящие
+            автомобили.
+          </p>
+        </aside>
+      </main>
+    </div>
+  )
 }
+
+export default App
