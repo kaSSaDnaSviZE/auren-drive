@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import './App.css'
 
 const questions = [
@@ -7,7 +11,7 @@ const questions = [
     number: '01',
     title: 'Какой у вас бюджет?',
     description:
-      'Укажите максимальный комфортный бюджет.',
+      'Укажите максимально комфортную сумму.',
     options: [
       'До 1 млн ₽',
       '1–2 млн ₽',
@@ -20,9 +24,9 @@ const questions = [
   {
     id: 'condition',
     number: '02',
-    title: 'Новый или б/у?',
+    title: 'Новый или с пробегом?',
     description:
-      'Какой возраст автомобиля рассматриваете?',
+      'Возраст автомобиля тоже влияет на подбор.',
     options: [
       'Новый',
       'Б/у до 3 лет',
@@ -34,9 +38,9 @@ const questions = [
   {
     id: 'body',
     number: '03',
-    title: 'Какой кузов вам нравится?',
+    title: 'Какой кузов нравится?',
     description:
-      'Можно выбрать несколько.',
+      'Можно выбрать несколько вариантов.',
     multi: true,
     options: [
       'Седан',
@@ -51,9 +55,9 @@ const questions = [
   {
     id: 'priority',
     number: '04',
-    title: 'Что для вас важнее всего?',
+    title: 'Что важнее всего?',
     description:
-      'Можно выбрать несколько.',
+      'Можно выбрать несколько приоритетов.',
     multi: true,
     options: [
       'Динамика',
@@ -71,7 +75,7 @@ const questions = [
     number: '05',
     title: 'Какую динамику хотите?',
     description:
-      'От спокойной езды до максимальной.',
+      'Не всем нужен спортивный автомобиль.',
     options: [
       'Спокойная',
       'Бодрая',
@@ -97,9 +101,9 @@ const questions = [
   {
     id: 'fuel',
     number: '07',
-    title: 'Как относитесь к расходу?',
+    title: 'Насколько важен расход?',
     description:
-      'Насколько важна экономичность?',
+      'Это сильно меняет итоговый подбор.',
     options: [
       'Очень важен низкий расход',
       'Желателен умеренный расход',
@@ -112,7 +116,7 @@ const questions = [
     number: '08',
     title: 'Есть любимые марки?',
     description:
-      'Можно выбрать несколько.',
+      'Можно выбрать несколько или любую.',
     multi: true,
     options: [
       'BMW',
@@ -127,9 +131,20 @@ const questions = [
   },
 ]
 
+function safeImage(car) {
+  if (
+    car?.image &&
+    /^https?:\/\//i.test(car.image)
+  ) {
+    return car.image
+  }
+
+  return ''
+}
+
 function App() {
-  const [started, setStarted] =
-    useState(false)
+  const [screen, setScreen] =
+    useState('home')
 
   const [step, setStep] =
     useState(0)
@@ -146,19 +161,81 @@ function App() {
   const [bestReason, setBestReason] =
     useState('')
 
+  const [marketNote, setMarketNote] =
+    useState('')
+
+  const [important, setImportant] =
+    useState('')
+
+  const [sources, setSources] =
+    useState([])
+
+  const [modelUsed, setModelUsed] =
+    useState('')
+
   const [loading, setLoading] =
     useState(false)
 
   const [error, setError] =
     useState('')
 
+  const [savedCars, setSavedCars] =
+    useState(() => {
+      try {
+        return JSON.parse(
+          localStorage.getItem(
+            'auren_saved_cars',
+          ) || '[]',
+        )
+      } catch {
+        return []
+      }
+    })
+
+  const [queryHistory, setQueryHistory] =
+    useState(() => {
+      try {
+        return JSON.parse(
+          localStorage.getItem(
+            'auren_history',
+          ) || '[]',
+        )
+      } catch {
+        return []
+      }
+    })
+
   const question =
     questions[step]
 
   const selected =
-    answers[question.id] || []
+    answers[question?.id] || []
 
-  function choose(option) {
+  useEffect(() => {
+    localStorage.setItem(
+      'auren_saved_cars',
+      JSON.stringify(savedCars),
+    )
+  }, [savedCars])
+
+  useEffect(() => {
+    localStorage.setItem(
+      'auren_history',
+      JSON.stringify(queryHistory),
+    )
+  }, [queryHistory])
+
+  const savedIds = useMemo(
+    () =>
+      new Set(
+        savedCars.map(
+          (car) => car.id,
+        ),
+      ),
+    [savedCars],
+  )
+
+  function toggleOption(option) {
     setError('')
 
     if (!question.multi) {
@@ -166,6 +243,7 @@ function App() {
         ...prev,
         [question.id]: [option],
       }))
+
       return
     }
 
@@ -174,49 +252,35 @@ function App() {
         prev[question.id] || []
 
       if (
-        question.id ===
-          'brand' &&
-        option ===
-          'Любая марка'
+        question.id === 'brand' &&
+        option === 'Любая марка'
       ) {
         return {
           ...prev,
           [question.id]:
-            current.includes(
-              option,
-            )
+            current.includes(option)
               ? []
               : ['Любая марка'],
         }
       }
 
       if (
-        question.id ===
-          'brand' &&
-        current.includes(
-          'Любая марка',
-        )
+        question.id === 'brand' &&
+        current.includes('Любая марка')
       ) {
         return {
           ...prev,
-          [question.id]: [
-            option,
-          ],
+          [question.id]: [option],
         }
       }
 
-      if (
-        current.includes(
-          option,
-        )
-      ) {
+      if (current.includes(option)) {
         return {
           ...prev,
           [question.id]:
             current.filter(
               (item) =>
-                item !==
-                option,
+                item !== option,
             ),
         }
       }
@@ -231,7 +295,62 @@ function App() {
     })
   }
 
-  async function research() {
+  function toggleSaved(car) {
+    setSavedCars((prev) => {
+      const exists = prev.some(
+        (item) =>
+          item.id === car.id,
+      )
+
+      if (exists) {
+        return prev.filter(
+          (item) =>
+            item.id !== car.id,
+        )
+      }
+
+      return [...prev, car]
+    })
+  }
+
+  function reset() {
+    setScreen('home')
+    setStep(0)
+    setAnswers({})
+    setCars([])
+    setBest('')
+    setBestReason('')
+    setMarketNote('')
+    setImportant('')
+    setSources([])
+    setModelUsed('')
+    setLoading(false)
+    setError('')
+  }
+
+  function begin() {
+    setScreen('quiz')
+    setStep(0)
+    setError('')
+  }
+
+  function back() {
+    if (loading) {
+      return
+    }
+
+    if (step > 0) {
+      setStep(
+        (value) =>
+          value - 1,
+      )
+      return
+    }
+
+    setScreen('home')
+  }
+
+  async function runResearch() {
     if (
       !selected.length ||
       loading
@@ -245,15 +364,9 @@ function App() {
         selected,
     }
 
-    setAnswers(
-      finalAnswers,
-    )
-
+    setAnswers(finalAnswers)
     setLoading(true)
     setError('')
-    setCars([])
-    setBest('')
-    setBestReason('')
 
     const controller =
       new AbortController()
@@ -304,27 +417,15 @@ function App() {
           typeof data?.error ===
             'string'
             ? data.error
-            : data?.error
-                ?.message ||
+            : data?.error?.message ||
                 `API ${response.status}`,
         )
       }
 
-      if (
-        !Array.isArray(
-          data.cars,
-        )
-      ) {
-        throw new Error(
-          'AUREN не вернул автомобили.',
-        )
-      }
-
       setCars(
-        data.cars.slice(
-          0,
-          3,
-        ),
+        Array.isArray(data.cars)
+          ? data.cars
+          : [],
       )
 
       setBest(
@@ -334,11 +435,66 @@ function App() {
       setBestReason(
         data.bestReason || '',
       )
-    } catch (err) {
-      setError(
-        err?.message ||
-          'Ошибка поиска.',
+
+      setMarketNote(
+        data.marketNote || '',
       )
+
+      setImportant(
+        data.important || '',
+      )
+
+      setSources(
+        Array.isArray(
+          data.sources,
+        )
+          ? data.sources
+          : [],
+      )
+
+      setModelUsed(
+        data.model || '',
+      )
+
+      setQueryHistory(
+        (prev) => [
+          {
+            id: Date.now(),
+            answers:
+              finalAnswers,
+            count:
+              Array.isArray(
+                data.cars,
+              )
+                ? data.cars.length
+                : 0,
+            createdAt:
+              new Date().toISOString(),
+          },
+          ...prev,
+        ].slice(0, 12),
+      )
+
+      setScreen('results')
+
+      window.scrollTo(
+        0,
+        0,
+      )
+    } catch (err) {
+      if (
+        err?.name ===
+        'AbortError'
+      ) {
+        setError(
+          'Исследование заняло больше минуты. Попробуйте ещё раз.',
+        )
+      } else {
+        setError(
+          err?.message ||
+            'Не удалось выполнить исследование.',
+        )
+      }
     } finally {
       clearTimeout(timeout)
       setLoading(false)
@@ -347,8 +503,8 @@ function App() {
 
   function next() {
     if (
-      !selected.length ||
-      loading
+      loading ||
+      !selected.length
     ) {
       return
     }
@@ -357,7 +513,7 @@ function App() {
       step ===
       questions.length - 1
     ) {
-      research()
+      runResearch()
       return
     }
 
@@ -365,168 +521,723 @@ function App() {
       (value) =>
         value + 1,
     )
+
+    window.scrollTo(
+      0,
+      0,
+    )
   }
 
-  function back() {
-    if (loading) return
+  function shareResult() {
+    const text =
+      `AUREN DRIVE — мой подбор: ${
+        cars
+          .map(
+            (car) =>
+              car.name,
+          )
+          .join(', ')
+      }`
 
-    if (step > 0) {
-      setStep(
-        (value) =>
-          value - 1,
-      )
+    if (
+      navigator.share
+    ) {
+      navigator.share({
+        title:
+          'AUREN DRIVE',
+        text,
+        url:
+          window.location.href,
+      })
+
       return
     }
 
-    setStarted(false)
+    navigator.clipboard?.writeText(
+      `${text}\n${window.location.href}`,
+    )
   }
 
-  function reset() {
-    setStarted(false)
-    setStep(0)
-    setAnswers({})
-    setCars([])
-    setBest('')
-    setBestReason('')
-    setError('')
-    setLoading(false)
-  }
-
-  if (cars.length > 0) {
+  if (
+    screen ===
+    'home'
+  ) {
     return (
-      <div className="drive-shell">
-        <header className="topbar">
-          <button
-            className="logo"
-            onClick={reset}
-          >
-            <span>AUREN</span>{' '}
+      <div className="app-shell">
+        <header className="nav">
+          <div className="brand">
+            <span>
+              AUREN
+            </span>{' '}
             DRIVE
-          </button>
+          </div>
 
-          <div className="live-indicator">
-            <i />
-            LIVE MARKET RESEARCH
+          <div className="nav-pill">
+            AI CAR RESEARCH
           </div>
 
           <button
-            className="secondary-btn"
+            className="nav-link"
+            onClick={() =>
+              savedCars.length
+                ? setScreen(
+                    'saved',
+                  )
+                : begin()
+            }
+          >
+            {savedCars.length >
+            0
+              ? `Избранное ${savedCars.length}`
+              : 'Начать'}
+          </button>
+        </header>
+
+        <main className="hero">
+          <section className="hero-main">
+            <div className="eyebrow">
+              AUREN DRIVE · LIVE
+              MARKET
+            </div>
+
+            <h1>
+              Машина должна
+              <br />
+              подходить
+              <br />
+              <em>
+                вам.
+              </em>
+            </h1>
+
+            <p className="hero-text">
+              Не бесконечный список
+              объявлений.
+              <br />
+              AUREN изучает ваши
+              предпочтения,
+              <br />
+              исследует рынок и
+              объясняет,
+              <br />
+              что действительно
+              стоит смотреть.
+            </p>
+
+            <div className="hero-actions">
+              <button
+                className="primary-btn"
+                onClick={begin}
+              >
+                Подобрать автомобиль
+                <span>
+                  →
+                </span>
+              </button>
+
+              {savedCars.length >
+                0 && (
+                <button
+                  className="ghost-btn"
+                  onClick={() =>
+                    setScreen(
+                      'saved',
+                    )
+                  }
+                >
+                  Избранное
+                  <span>
+                    {savedCars.length}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            <div className="trust-row">
+              <span>
+                ● LIVE WEB SEARCH
+              </span>
+
+              <span>
+                ● НЕ СТАТИЧНАЯ БАЗА
+              </span>
+
+              <span>
+                ● TOP-3 MATCH
+              </span>
+            </div>
+          </section>
+
+          <section className="hero-art">
+            <div className="art-grid" />
+
+            <div className="art-ring">
+              <div>
+                <small>
+                  AUREN
+                </small>
+
+                <strong>
+                  DRIVE
+                </strong>
+              </div>
+            </div>
+
+            <div className="art-card card-top">
+              <span>
+                MATCH
+              </span>
+
+              <strong>
+                97%
+              </strong>
+            </div>
+
+            <div className="art-card card-bottom">
+              <span>
+                WEB SEARCH
+              </span>
+
+              <strong>
+                LIVE
+              </strong>
+            </div>
+          </section>
+        </main>
+
+        <section className="feature-strip">
+          <div>
+            <span>
+              01
+            </span>
+
+            <strong>
+              Персональный подбор
+            </strong>
+
+            <p>
+              Система учитывает не
+              только бюджет, но и
+              характер будущего
+              владельца.
+            </p>
+          </div>
+
+          <div>
+            <span>
+              02
+            </span>
+
+            <strong>
+              Реальный рынок
+            </strong>
+
+            <p>
+              AUREN использует
+              актуальный веб-поиск,
+              а не фиксированный
+              каталог.
+            </p>
+          </div>
+
+          <div>
+            <span>
+              03
+            </span>
+
+            <strong>
+              Объяснение решения
+            </strong>
+
+            <p>
+              Ты получаешь не только
+              модель, но и аргументы:
+              плюсы, минусы и риски.
+            </p>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
+  if (
+    screen ===
+    'saved'
+  ) {
+    return (
+      <div className="app-shell">
+        <header className="nav">
+          <button
+            className="brand brand-button"
             onClick={reset}
+          >
+            <span>
+              AUREN
+            </span>{' '}
+            DRIVE
+          </button>
+
+          <button
+            className="nav-link"
+            onClick={begin}
           >
             Новый подбор
           </button>
         </header>
 
-        <main className="results-page">
-          <section className="results-hero">
-            <div>
-              <div className="eyebrow">
-                AUREN DRIVE · TOP
-                MATCHES
-              </div>
+        <main className="saved-page">
+          <div className="eyebrow">
+            YOUR GARAGE
+          </div>
 
-              <h1>
-                Вот что
-                <br />
-                подходит
-                <span>
-                  {' '}
-                  вам.
-                </span>
-              </h1>
+          <h1>
+            Избранные
+            <br />
+            автомобили.
+          </h1>
 
-              <p>
-                AUREN исследовал
-                актуальные данные
-                и подобрал наиболее
-                подходящие варианты.
-              </p>
-            </div>
-
-            <div className="profile-box">
-              <span>
-                YOUR REQUEST
-              </span>
-
+          {savedCars.length ===
+          0 ? (
+            <div className="empty-state">
               <strong>
-                {answers.budget?.[0] ||
-                  '—'}
+                Здесь пока пусто.
               </strong>
 
-              <small>
-                {answers.body?.join(
-                  ' · ',
-                ) ||
-                  'Любой кузов'}
-              </small>
+              <p>
+                Добавляй автомобили
+                в избранное из
+                результатов поиска.
+              </p>
 
-              <small>
-                {answers.priority?.join(
-                  ' · ',
-                ) ||
-                  'Без приоритетов'}
-              </small>
+              <button
+                className="primary-btn"
+                onClick={begin}
+              >
+                Начать подбор →
+              </button>
+            </div>
+          ) : (
+            <div className="saved-grid">
+              {savedCars.map(
+                (car) => (
+                  <article
+                    className="saved-card"
+                    key={
+                      car.id
+                    }
+                  >
+                    {safeImage(
+                      car,
+                    ) ? (
+                      <img
+                        src={
+                          car.image
+                        }
+                        alt={
+                          car.name
+                        }
+                      />
+                    ) : (
+                      <div className="saved-placeholder">
+                        AUREN DRIVE
+                      </div>
+                    )}
+
+                    <div>
+                      <span>
+                        TOP MATCH
+                      </span>
+
+                      <h2>
+                        {
+                          car.name
+                        }
+                      </h2>
+
+                      <strong>
+                        {
+                          car.price ||
+                          'Цена не указана'
+                        }
+                      </strong>
+                    </div>
+
+                    <button
+                      className="remove-btn"
+                      onClick={() =>
+                        toggleSaved(
+                          car,
+                        )
+                      }
+                    >
+                      Убрать
+                    </button>
+                  </article>
+                ),
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+    )
+  }
+
+  if (
+    screen ===
+    'quiz'
+  ) {
+    return (
+      <div className="app-shell">
+        <header className="nav">
+          <button
+            className="brand brand-button"
+            onClick={reset}
+          >
+            <span>
+              AUREN
+            </span>{' '}
+            DRIVE
+          </button>
+
+          <div className="progress-wrap">
+            <span>
+              {question.number}
+              {' '}
+              / 08
+            </span>
+
+            <div>
+              <i
+                style={{
+                  width: `${
+                    ((step + 1) /
+                      questions.length) *
+                    100
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+        </header>
+
+        <main className="quiz">
+          <section>
+            <div className="eyebrow">
+              {question.number}
+              {' '}
+              / 08
+            </div>
+
+            <h1>
+              {
+                question.title
+              }
+            </h1>
+
+            <p>
+              {
+                question.description
+              }
+            </p>
+
+            <div className="options">
+              {question.options.map(
+                (
+                  option,
+                  index,
+                ) => {
+                  const active =
+                    selected.includes(
+                      option,
+                    )
+
+                  return (
+                    <button
+                      key={
+                        option
+                      }
+                      className={`option ${
+                        active
+                          ? 'active'
+                          : ''
+                      }`}
+                      onClick={() =>
+                        toggleOption(
+                          option,
+                        )
+                      }
+                    >
+                      <span>
+                        {String(
+                          index +
+                            1,
+                        ).padStart(
+                          2,
+                          '0',
+                        )}
+                      </span>
+
+                      <strong>
+                        {
+                          option
+                        }
+                      </strong>
+
+                      <b>
+                        {active
+                          ? '✓'
+                          : '→'}
+                      </b>
+                    </button>
+                  )
+                },
+              )}
+            </div>
+
+            {error && (
+              <div className="error-card">
+                <strong>
+                  AUREN ERROR
+                </strong>
+
+                <p>
+                  {
+                    error
+                  }
+                </p>
+              </div>
+            )}
+
+            {loading && (
+              <div className="loading-card">
+                <div className="loader" />
+
+                <div>
+                  <strong>
+                    Исследуем рынок
+                  </strong>
+
+                  <span>
+                    AUREN ищет
+                    актуальные данные,
+                    сравнивает варианты
+                    и проверяет
+                    источники…
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="quiz-actions">
+              <button
+                className="ghost-btn"
+                onClick={back}
+                disabled={
+                  loading
+                }
+              >
+                ← Назад
+              </button>
+
+              <button
+                className="primary-btn"
+                onClick={next}
+                disabled={
+                  loading ||
+                  !selected.length
+                }
+              >
+                {loading
+                  ? 'Исследуем…'
+                  : step === 7
+                    ? 'Найти автомобиль'
+                    : 'Продолжить'}
+
+                <span>
+                  →
+                </span>
+              </button>
             </div>
           </section>
 
-          {best && (
-            <section className="best-banner">
-              <div>
-                <div className="eyebrow">
-                  AUREN CHOICE
-                </div>
+          <aside className="quiz-aside">
+            <div className="giant-step">
+              {
+                question.number
+              }
+            </div>
 
-                <h2>
-                  {best}
-                </h2>
-
-                <p>
-                  {bestReason}
-                </p>
+            <div>
+              <div className="eyebrow">
+                LIVE SEARCH
               </div>
 
-              <strong className="best-number">
-                01
-              </strong>
-            </section>
-          )}
+              <p>
+                Чем точнее ответы,
+                тем полезнее итоговый
+                подбор.
+              </p>
+            </div>
+          </aside>
+        </main>
+      </div>
+    )
+  }
 
-          <section className="car-results-grid">
-            {cars.map(
-              (
-                car,
-                index,
-              ) => (
+  return (
+    <div className="app-shell results-app">
+      <header className="nav">
+        <button
+          className="brand brand-button"
+          onClick={reset}
+        >
+          <span>
+            AUREN
+          </span>{' '}
+          DRIVE
+        </button>
+
+        <div className="result-actions">
+          <button
+            className="ghost-btn compact"
+            onClick={
+              shareResult
+            }
+          >
+            Поделиться
+          </button>
+
+          <button
+            className="nav-link"
+            onClick={reset}
+          >
+            Новый подбор
+          </button>
+        </div>
+      </header>
+
+      <main className="results-page">
+        <section className="results-head">
+          <div>
+            <div className="eyebrow">
+              AUREN DRIVE · RESULT
+            </div>
+
+            <h1>
+              Нашли.
+              <br />
+              Теперь
+              <em>
+                {' '}
+                сравниваем.
+              </em>
+            </h1>
+
+            <p>
+              Вот три варианта,
+              которые AUREN считает
+              наиболее подходящими
+              под твой запрос.
+            </p>
+          </div>
+
+          <div className="request-card">
+            <span>
+              YOUR BRIEF
+            </span>
+
+            <strong>
+              {answers.budget?.[0] ||
+                '—'}
+            </strong>
+
+            <small>
+              {answers.body?.join(
+                ' · ',
+              ) ||
+                'Любой кузов'}
+            </small>
+
+            <small>
+              {answers.priority?.join(
+                ' · ',
+              ) ||
+                'Любые приоритеты'}
+            </small>
+
+            {modelUsed && (
+              <small>
+                AI: {modelUsed}
+              </small>
+            )}
+          </div>
+        </section>
+
+        {best && (
+          <section className="best-card">
+            <div>
+              <span className="eyebrow">
+                AUREN CHOICE
+              </span>
+
+              <h2>
+                {best}
+              </h2>
+
+              <p>
+                {bestReason}
+              </p>
+            </div>
+
+            <strong>
+              01
+            </strong>
+          </section>
+        )}
+
+        <section className="car-grid">
+          {cars.map(
+            (
+              car,
+              index,
+            ) => {
+              const saved =
+                savedIds.has(
+                  car.id,
+                )
+
+              const img =
+                safeImage(
+                  car,
+                )
+
+              return (
                 <article
-                  className="car-result-card"
+                  className="car-card"
                   key={
                     car.id
                   }
                 >
-                  <div className="car-result-image">
-                    {car.photoUrl ? (
+                  <div className="car-photo">
+                    {img ? (
                       <img
                         src={
-                          car.photoUrl
+                          img
                         }
                         alt={
                           car.name
                         }
                         onError={(
-                          event,
+                          e,
                         ) => {
-                          event.currentTarget.style.display =
+                          e.currentTarget.style.display =
                             'none'
-                          event.currentTarget.parentElement.classList.add(
-                            'no-photo',
-                          )
                         }}
                       />
                     ) : (
-                      <div className="no-photo-content">
+                      <div className="car-placeholder">
                         <span>
                           AUREN
-                          DRIVE
                         </span>
 
                         <strong>
@@ -536,38 +1247,50 @@ function App() {
                         </strong>
 
                         <small>
-                          Фото из
+                          Фото
                           источника
-                          не найдено
+                          недоступно
                         </small>
                       </div>
                     )}
 
-                    <span className="rank-badge">
+                    <div className="photo-gradient" />
+
+                    <span className="rank">
                       0
                       {index +
                         1}
                     </span>
 
-                    {car.hasRealPhoto && (
-                      <span className="photo-badge">
-                        SOURCE PHOTO
+                    {car.hasRealListing && (
+                      <span className="real-badge">
+                        REAL LISTING
                       </span>
                     )}
+
+                    <button
+                      className={`save-btn ${
+                        saved
+                          ? 'saved'
+                          : ''
+                      }`}
+                      onClick={() =>
+                        toggleSaved(
+                          car,
+                        )
+                      }
+                    >
+                      {saved
+                        ? '♥'
+                        : '♡'}
+                    </button>
                   </div>
 
                   <div className="car-content">
-                    <div className="card-topline">
+                    <div className="card-kicker">
                       TOP{' '}
                       {index +
                         1}
-
-                      {car.hasRealListing && (
-                        <span>
-                          REAL
-                          LISTING
-                        </span>
-                      )}
                     </div>
 
                     <h2>
@@ -576,70 +1299,86 @@ function App() {
                       }
                     </h2>
 
-                    <div className="car-price">
-                      {
-                        car.price ||
-                        'Цена не определена'
-                      }
+                    <div className="price">
+                      {car.price ||
+                        'Цена не подтверждена'}
                     </div>
 
-                    {car.specs && (
-                      <div className="car-specs">
-                        {
-                          car.specs
-                        }
-                      </div>
-                    )}
-
-                    {car.why && (
-                      <section className="info-block accent">
+                    <div className="chips">
+                      {car.year && (
                         <span>
-                          ПОЧЕМУ
-                          ПОДХОДИТ
+                          {
+                            car.year
+                          }
+                        </span>
+                      )}
+
+                      {car.body && (
+                        <span>
+                          {
+                            car.body
+                          }
+                        </span>
+                      )}
+
+                      {car.power && (
+                        <span>
+                          {
+                            car.power
+                          }
+                        </span>
+                      )}
+
+                      {car.drive && (
+                        <span>
+                          {
+                            car.drive
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="why-box">
+                      <span>
+                        ПОЧЕМУ ПОДХОДИТ
+                      </span>
+
+                      <p>
+                        {car.why ||
+                          'AUREN не получил достаточно данных для точного объяснения.'}
+                      </p>
+                    </div>
+
+                    <div className="pros-cons">
+                      <div>
+                        <span>
+                          ПЛЮСЫ
                         </span>
 
                         <p>
                           {
-                            car.why
+                            car.pros
                           }
                         </p>
-                      </section>
-                    )}
+                      </div>
 
-                    <div className="two-blocks">
-                      {car.pros && (
-                        <section className="info-block">
-                          <span>
-                            ПЛЮСЫ
-                          </span>
+                      <div>
+                        <span>
+                          МИНУСЫ
+                        </span>
 
-                          <p>
-                            {
-                              car.pros
-                            }
-                          </p>
-                        </section>
-                      )}
-
-                      {car.cons && (
-                        <section className="info-block">
-                          <span>
-                            МИНУСЫ
-                          </span>
-
-                          <p>
-                            {
-                              car.cons
-                            }
-                          </p>
-                        </section>
-                      )}
+                        <p>
+                          {
+                            car.cons
+                          }
+                        </p>
+                      </div>
                     </div>
 
                     {car.problems && (
-                      <section className="info-block">
+                      <div className="info-box">
                         <span>
-                          ПРОБЛЕМЫ
+                          ТИПИЧНЫЕ ПРОБЛЕМЫ
                         </span>
 
                         <p>
@@ -647,369 +1386,218 @@ function App() {
                             car.problems
                           }
                         </p>
-                      </section>
+                      </div>
                     )}
 
                     {car.check && (
-                      <section className="info-block">
+                      <div className="info-box">
                         <span>
-                          ЧТО
-                          ПРОВЕРИТЬ
+                          ПЕРЕД ПОКУПКОЙ
+                        </span>
+
+                        <p>
+                          {car.check}
+                        </p>
+                      </div>
+                    )}
+
+                    {car.bestFor && (
+                      <div className="info-box">
+                        <span>
+                          КОМУ ПОДХОДИТ
                         </span>
 
                         <p>
                           {
-                            car.check
+                            car.bestFor
                           }
                         </p>
-                      </section>
+                      </div>
                     )}
 
-                    <div className="card-actions">
-                      {car.listingUrl && (
+                    <div className="card-buttons">
+                      {car.listingUrl ? (
                         <a
-                          className="orange-btn"
                           href={
                             car.listingUrl
                           }
                           target="_blank"
                           rel="noreferrer"
+                          className="primary-btn full"
                         >
-                          Реальное
-                          объявление
+                          Открыть объявление
                           <span>
                             ↗
                           </span>
                         </a>
+                      ) : (
+                        <button
+                          className="primary-btn full"
+                          onClick={() =>
+                            window.open(
+                              `https://www.google.com/search?q=${encodeURIComponent(
+                                `${car.name} купить Россия`,
+                              )}`,
+                              '_blank',
+                            )
+                          }
+                        >
+                          Найти объявления
+                          <span>
+                            ↗
+                          </span>
+                        </button>
                       )}
 
-                      {car.sourceUrl &&
-                        car.sourceUrl !==
-                          car.listingUrl && (
-                          <a
-                            className="secondary-btn"
-                            href={
-                              car.sourceUrl
-                            }
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Источник
-                          </a>
-                        )}
+                      {car.sourceUrl && (
+                        <a
+                          href={
+                            car.sourceUrl
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ghost-btn full"
+                        >
+                          Источник
+                        </a>
+                      )}
                     </div>
-
-                    {!car.listingUrl && (
-                      <div className="source-warning">
-                        Конкретное
-                        объявление не
-                        найдено. AUREN
-                        не создаёт
-                        фиктивную ссылку.
-                      </div>
-                    )}
                   </div>
                 </article>
-              ),
-            )}
-          </section>
+              )
+            },
+          )}
+        </section>
 
-          <section className="research-note">
+        {marketNote && (
+          <section className="market-card">
             <div>
-              <div className="eyebrow">
-                DATA POLICY
-              </div>
+              <span className="eyebrow">
+                MARKET NOTE
+              </span>
 
               <h2>
-                Только реальные
-                <br />
-                источники.
+                Что заметил
+                AUREN.
               </h2>
             </div>
 
             <p>
-              AUREN больше не
-              генерирует ссылки на
-              объявления самостоятельно.
-              Ссылка появляется только
-              тогда, когда она пришла
-              из реального результата
-              веб-поиска. Фото также
-              берётся со страницы
-              источника, когда это
-              технически возможно.
+              {marketNote}
             </p>
           </section>
+        )}
 
-          <button
-            className="orange-btn large"
-            onClick={reset}
-          >
-            Новый подбор →
-          </button>
-        </main>
-      </div>
-    )
-  }
-
-  if (!started) {
-    return (
-      <div className="drive-shell">
-        <header className="topbar">
-          <button
-            className="logo"
-            onClick={reset}
-          >
-            <span>AUREN</span>{' '}
-            DRIVE
-          </button>
-
-          <div className="live-indicator">
-            <i />
-            LIVE WEB AI
-          </div>
-        </header>
-
-        <main className="hero-screen">
-          <section className="hero-copy">
-            <div className="eyebrow">
-              AUREN DRIVE · AI CAR
-              FINDER
-            </div>
-
-            <h1>
-              Найдём машину
-              <br />
-              которая подходит
-              <br />
-              <span>
-                именно вам.
-              </span>
-            </h1>
+        {important && (
+          <section className="important-card">
+            <span className="eyebrow">
+              IMPORTANT
+            </span>
 
             <p>
-              Бюджет, стиль езды,
-              надёжность, комфорт.
-              AUREN исследует рынок
-              и сравнивает актуальные
-              данные.
+              {important}
             </p>
-
-            <button
-              className="orange-btn large"
-              onClick={() =>
-                setStarted(
-                  true,
-                )
-              }
-            >
-              Начать подбор
-              <span>
-                →
-              </span>
-            </button>
           </section>
+        )}
 
-          <section className="hero-visual">
-            <div className="hero-orbit" />
-
-            <div className="hero-circle">
-              <span>
-                LIVE
+        {sources.length >
+          0 && (
+          <section className="sources-card">
+            <div>
+              <span className="eyebrow">
+                RESEARCH SOURCES
               </span>
 
-              <strong>
-                DRIVE
-              </strong>
+              <h2>
+                На что опирался
+                AUREN.
+              </h2>
             </div>
-          </section>
-        </main>
-      </div>
-    )
-  }
 
-  return (
-    <div className="drive-shell">
-      <header className="topbar">
-        <button
-          className="logo"
-          onClick={reset}
-        >
-          <span>AUREN</span>{' '}
-          DRIVE
-        </button>
-
-        <div className="progress-wide">
-          <span>
-            {question.number}{' '}
-            / 08
-          </span>
-
-          <div>
-            <i
-              style={{
-                width: `${
-                  ((step + 1) /
-                    questions.length) *
-                  100
-                }%`,
-              }}
-            />
-          </div>
-        </div>
-      </header>
-
-      <main className="quiz-screen">
-        <section className="quiz-main">
-          <div className="eyebrow">
-            {question.number}{' '}
-            / 08
-          </div>
-
-          <h1>
-            {
-              question.title
-            }
-          </h1>
-
-          <p>
-            {
-              question.description
-            }
-          </p>
-
-          <div className="full-option-grid">
-            {question.options.map(
-              (
-                option,
-                index,
-              ) => {
-                const active =
-                  selected.includes(
-                    option,
-                  )
-
-                return (
-                  <button
-                    key={
-                      option
-                    }
-                    className={`big-option ${
-                      active
-                        ? 'active'
-                        : ''
-                    }`}
-                    onClick={() =>
-                      choose(
-                        option,
-                      )
-                    }
-                  >
-                    <span>
-                      {String(
-                        index +
-                          1,
-                      ).padStart(
-                        2,
-                        '0',
-                      )}
-                    </span>
-
-                    <strong>
-                      {
-                        option
+            <div className="source-list">
+              {sources
+                .slice(
+                  0,
+                  8,
+                )
+                .map(
+                  (
+                    source,
+                    index,
+                  ) => (
+                    <a
+                      href={
+                        source.url
                       }
-                    </strong>
+                      target="_blank"
+                      rel="noreferrer"
+                      key={
+                        source.url
+                      }
+                    >
+                      <span>
+                        0
+                        {index +
+                          1}
+                      </span>
 
-                    <b>
-                      {active
-                        ? '✓'
-                        : '→'}
-                    </b>
-                  </button>
-                )
-              },
-            )}
+                      <strong>
+                        {
+                          source.title ||
+                          source.url
+                        }
+                      </strong>
+
+                      <b>
+                        ↗
+                      </b>
+                    </a>
+                  ),
+                )}
+            </div>
+          </section>
+        )}
+
+        <section className="monetization-card">
+          <div>
+            <span className="eyebrow">
+              NEXT STEP
+            </span>
+
+            <h2>
+              Хочешь,
+              чтобы AUREN
+              искал ещё лучше?
+            </h2>
+
+            <p>
+              Следующий уровень продукта —
+              конкретные объявления,
+              история цен, сравнение
+              вариантов и уведомления
+              о новых предложениях.
+            </p>
           </div>
 
-          {error && (
-            <div className="error-box">
-              <strong>
-                AUREN DRIVE ERROR
-              </strong>
-
-              <p>
-                {
-                  error
-                }
-              </p>
-            </div>
-          )}
-
-          {loading && (
-            <div className="loading-box">
-              AUREN ищет реальные
-              источники и
-              фотографии...
-            </div>
-          )}
-
-          <div className="quiz-actions">
+          <div className="monetization-actions">
             <button
-              className="back-btn"
-              onClick={back}
-              disabled={
-                loading
-              }
+              className="primary-btn"
+              onClick={begin}
             >
-              ← Назад
-            </button>
-
-            <button
-              className="orange-btn"
-              onClick={
-                next
-              }
-              disabled={
-                loading ||
-                !selected.length
-              }
-            >
-              {loading
-                ? 'Ищем...'
-                : step === 7
-                  ? 'Найти автомобили'
-                  : 'Продолжить'}
-
+              Новый подбор
               <span>
                 →
               </span>
             </button>
+
+            <a
+              className="ghost-btn"
+              href="mailto:hello@auren-drive.ru"
+            >
+              Связаться
+            </a>
           </div>
         </section>
-
-        <aside className="quiz-aside">
-          <strong>
-            {
-              question.number
-            }
-          </strong>
-
-          <div>
-            <div className="eyebrow">
-              LIVE SEARCH
-            </div>
-
-            <p>
-              AUREN будет
-              использовать
-              реальные результаты
-              поиска, а не
-              выдумывать
-              объявления.
-            </p>
-          </div>
-        </aside>
       </main>
     </div>
   )
