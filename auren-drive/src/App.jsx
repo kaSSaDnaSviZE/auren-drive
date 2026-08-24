@@ -6,7 +6,8 @@ const questions = [
     id: 'budget',
     number: '01',
     title: 'Какой у вас бюджет?',
-    description: 'Укажите максимальный комфортный бюджет на покупку.',
+    description:
+      'Укажите максимальный комфортный бюджет.',
     options: [
       'До 1 млн ₽',
       '1–2 млн ₽',
@@ -19,8 +20,9 @@ const questions = [
   {
     id: 'condition',
     number: '02',
-    title: 'Какой автомобиль вы рассматриваете?',
-    description: 'Новый или автомобиль с пробегом?',
+    title: 'Новый или б/у?',
+    description:
+      'Какой возраст автомобиля вы рассматриваете?',
     options: [
       'Новый',
       'Б/у до 3 лет',
@@ -33,7 +35,8 @@ const questions = [
     id: 'body',
     number: '03',
     title: 'Какой кузов вам нравится?',
-    description: 'Можно выбрать несколько вариантов.',
+    description:
+      'Можно выбрать несколько.',
     multi: true,
     options: [
       'Седан',
@@ -49,7 +52,8 @@ const questions = [
     id: 'priority',
     number: '04',
     title: 'Что для вас важнее всего?',
-    description: 'Выберите один или несколько приоритетов.',
+    description:
+      'Можно выбрать несколько приоритетов.',
     multi: true,
     options: [
       'Динамика',
@@ -65,8 +69,9 @@ const questions = [
   {
     id: 'power',
     number: '05',
-    title: 'Какую динамику вы хотите?',
-    description: 'От спокойной езды до настоящего performance.',
+    title: 'Какую динамику хотите?',
+    description:
+      'От спокойной езды до максимальной динамики.',
     options: [
       'Спокойная',
       'Бодрая',
@@ -79,7 +84,8 @@ const questions = [
     id: 'drive',
     number: '06',
     title: 'Какой привод предпочитаете?',
-    description: 'Можно выбрать несколько вариантов.',
+    description:
+      'Можно выбрать несколько.',
     multi: true,
     options: [
       'Передний',
@@ -92,7 +98,8 @@ const questions = [
     id: 'fuel',
     number: '07',
     title: 'Как относитесь к расходу?',
-    description: 'Это поможет точнее определить характер автомобиля.',
+    description:
+      'Насколько важна экономичность?',
     options: [
       'Очень важен низкий расход',
       'Желателен умеренный расход',
@@ -104,7 +111,8 @@ const questions = [
     id: 'brand',
     number: '08',
     title: 'Есть любимые марки?',
-    description: 'Выберите несколько или любую марку.',
+    description:
+      'Выберите несколько или любую.',
     multi: true,
     options: [
       'BMW',
@@ -120,19 +128,34 @@ const questions = [
 ]
 
 function App() {
-  const [started, setStarted] = useState(false)
-  const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState({})
-  const [results, setResults] = useState([])
-  const [noMatches, setNoMatches] = useState(false)
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [started, setStarted] =
+    useState(false)
 
-  const question = questions[step]
-  const selected = answers[question.id] || []
+  const [step, setStep] =
+    useState(0)
 
-  const choose = (option) => {
+  const [answers, setAnswers] =
+    useState({})
+
+  const [loading, setLoading] =
+    useState(false)
+
+  const [answer, setAnswer] =
+    useState('')
+
+  const [sources, setSources] =
+    useState([])
+
+  const [error, setError] =
+    useState('')
+
+  const question =
+    questions[step]
+
+  const selected =
+    answers[question.id] || []
+
+  function selectOption(option) {
     setError('')
 
     if (!question.multi) {
@@ -140,123 +163,170 @@ function App() {
         ...prev,
         [question.id]: [option],
       }))
+
       return
     }
 
     setAnswers((prev) => {
-      const current = prev[question.id] || []
+      const current =
+        prev[question.id] || []
 
-      if (question.id === 'brand') {
-        if (option === 'Любая марка') {
-          return {
-            ...prev,
-            [question.id]: current.includes(option)
+      if (
+        question.id === 'brand' &&
+        option === 'Любая марка'
+      ) {
+        return {
+          ...prev,
+          [question.id]:
+            current.includes(option)
               ? []
               : ['Любая марка'],
-          }
         }
+      }
 
-        if (current.includes('Любая марка')) {
-          return {
-            ...prev,
-            [question.id]: [option],
-          }
+      if (
+        question.id === 'brand' &&
+        current.includes(
+          'Любая марка',
+        )
+      ) {
+        return {
+          ...prev,
+          [question.id]: [option],
         }
       }
 
       if (current.includes(option)) {
         return {
           ...prev,
-          [question.id]: current.filter(
-            (item) => item !== option,
-          ),
+          [question.id]:
+            current.filter(
+              (item) =>
+                item !== option,
+            ),
         }
       }
 
       return {
         ...prev,
-        [question.id]: [...current, option],
+        [question.id]: [
+          ...current,
+          option,
+        ],
       }
     })
   }
 
-  const submit = async () => {
-    if (!selected.length || loading) {
+  async function runResearch() {
+    if (
+      !selected.length ||
+      loading
+    ) {
       return
     }
 
     const finalAnswers = {
       ...answers,
-      [question.id]: selected,
+      [question.id]:
+        selected,
     }
 
     setAnswers(finalAnswers)
     setLoading(true)
     setError('')
-    setResults([])
-    setNoMatches(false)
-    setMessage('')
+    setAnswer('')
+    setSources([])
 
-    const controller = new AbortController()
+    const controller =
+      new AbortController()
 
-    const timeout = setTimeout(() => {
-      controller.abort()
-    }, 15000)
+    const timeout =
+      setTimeout(() => {
+        controller.abort()
+      }, 30000)
 
     try {
-      const response = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          answers: finalAnswers,
-        }),
-        signal: controller.signal,
-      })
+      const response =
+        await fetch(
+          '/api/recommend',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/json',
+              Accept:
+                'application/json',
+            },
+            body: JSON.stringify({
+              answers:
+                finalAnswers,
+            }),
+            signal:
+              controller.signal,
+          },
+        )
 
-      const rawText = await response.text()
+      const text =
+        await response.text()
 
-      let data = {}
+      let data
 
       try {
-        data = rawText ? JSON.parse(rawText) : {}
+        data = text
+          ? JSON.parse(text)
+          : {}
       } catch {
         throw new Error(
-          `Сервер вернул некорректный ответ: ${rawText.slice(
+          `API returned invalid JSON: ${text.slice(
             0,
-            300,
+            400,
           )}`,
         )
       }
 
       if (!response.ok) {
         throw new Error(
-          data?.error || `API ошибка ${response.status}`,
+          data?.error ||
+            `API ${response.status}`,
         )
       }
 
-      if (!Array.isArray(data.recommendations)) {
+      if (
+        !data.answer
+      ) {
         throw new Error(
-          'API не вернул массив рекомендаций',
+          'AUREN returned an empty research result',
         )
       }
 
-      setResults(data.recommendations)
-      setNoMatches(Boolean(data.noMatches))
-      setMessage(data.message || '')
-    } catch (err) {
-      console.error('AUREN DRIVE ERROR:', err)
+      setAnswer(
+        data.answer,
+      )
 
-      if (err?.name === 'AbortError') {
+      setSources(
+        Array.isArray(
+          data.sources,
+        )
+          ? data.sources
+          : [],
+      )
+    } catch (err) {
+      console.error(
+        'AUREN DRIVE:',
+        err,
+      )
+
+      if (
+        err?.name ===
+        'AbortError'
+      ) {
         setError(
-          'Сервер не ответил за 15 секунд. Проверьте Vercel → Logs.',
+          'Веб-исследование заняло больше 30 секунд. Попробуйте ещё раз.',
         )
       } else {
         setError(
           err?.message ||
-            'Не удалось получить рекомендации.',
+            'Не удалось выполнить исследование.',
         )
       }
     } finally {
@@ -265,47 +335,61 @@ function App() {
     }
   }
 
-  const next = () => {
-    if (!selected.length || loading) {
+  function next() {
+    if (
+      !selected.length ||
+      loading
+    ) {
       return
     }
 
-    if (step === questions.length - 1) {
-      submit()
+    if (
+      step ===
+      questions.length - 1
+    ) {
+      runResearch()
       return
     }
 
-    setStep((value) => value + 1)
+    setStep(
+      (value) =>
+        value + 1,
+    )
   }
 
-  const back = () => {
+  function back() {
     if (loading) return
 
     if (step > 0) {
-      setStep((value) => value - 1)
-      return
+      setStep(
+        (value) =>
+          value - 1,
+      )
+    } else {
+      setStarted(false)
     }
-
-    setStarted(false)
   }
 
-  const reset = () => {
+  function reset() {
     setStarted(false)
     setStep(0)
     setAnswers({})
-    setResults([])
-    setNoMatches(false)
-    setMessage('')
-    setLoading(false)
+    setAnswer('')
+    setSources([])
     setError('')
+    setLoading(false)
   }
 
-  if (results.length > 0 || noMatches) {
+  if (answer) {
     return (
       <div className="drive-app">
         <header className="drive-header">
-          <button className="drive-logo" onClick={reset}>
-            <span>AUREN</span> DRIVE
+          <button
+            className="drive-logo"
+            onClick={reset}
+          >
+            <span>AUREN</span>{' '}
+            DRIVE
           </button>
 
           <button
@@ -317,179 +401,82 @@ function App() {
         </header>
 
         <main className="results-page">
-          <div className="results-heading">
-            <div>
-              <div className="landing-eyebrow">
-                AUREN AI · RESULT
-              </div>
-
-              <h1>
-                Ваши лучшие
-                <br />
-                варианты.
-              </h1>
-
-              <p>
-                Подбор сформирован на основе
-                ваших требований.
-              </p>
-            </div>
-
-            <div className="profile-panel">
-              <div>
-                <span>БЮДЖЕТ</span>
-                <strong>
-                  {answers.budget?.[0] || '—'}
-                </strong>
-              </div>
-
-              <div>
-                <span>КУЗОВ</span>
-                <strong>
-                  {answers.body?.join(', ') || 'Любой'}
-                </strong>
-              </div>
-
-              <div>
-                <span>ПРИОРИТЕТЫ</span>
-                <strong>
-                  {answers.priority?.join(', ') || '—'}
-                </strong>
-              </div>
-            </div>
+          <div className="landing-eyebrow">
+            AUREN DRIVE · WEB RESEARCH
           </div>
 
-          {noMatches && (
-            <section className="no-results">
-              <div className="no-results-number">
-                00
+          <h1>
+            Результат
+            <br />
+            исследования.
+          </h1>
+
+          <section className="ai-result">
+            <div className="ai-result-label">
+              LIVE WEB RESEARCH
+            </div>
+
+            <div className="ai-result-text">
+              {answer}
+            </div>
+          </section>
+
+          {sources.length >
+            0 && (
+            <section className="sources-box">
+              <div className="landing-eyebrow">
+                SOURCES
               </div>
 
-              <div>
-                <div className="landing-eyebrow">
-                  NO MATCH
-                </div>
+              <h2>
+                Использованные
+                источники
+              </h2>
 
-                <h2>
-                  Подходящих вариантов
-                  <br />
-                  сейчас нет.
-                </h2>
+              <div className="sources-list">
+                {sources.map(
+                  (
+                    source,
+                    index,
+                  ) => (
+                    <a
+                      key={`${source.url}-${index}`}
+                      href={
+                        source.url
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <span>
+                        0
+                        {index +
+                          1}
+                      </span>
 
-                <p>
-                  {message ||
-                    'В текущей демонстрационной базе нет подходящих автомобилей. Попробуйте изменить параметры.'}
-                </p>
+                      <strong>
+                        {
+                          source.title
+                        }
+                      </strong>
+
+                      <small>
+                        {
+                          source.url
+                        }
+                      </small>
+
+                      <b>
+                        →
+                      </b>
+                    </a>
+                  ),
+                )}
               </div>
-
-              <button
-                className="drive-primary"
-                onClick={reset}
-              >
-                Изменить параметры →
-              </button>
             </section>
           )}
 
-          {results.length > 0 && (
-            <div className="results-grid">
-              {results.map((car, index) => (
-                <article
-                  className="result-card"
-                  key={car.id || `${car.name}-${index}`}
-                >
-                  <div className="result-card-top">
-                    <span className="result-index">
-                      0{index + 1}
-                    </span>
-
-                    <span className="match-badge">
-                      {car.match_score ?? 0}% MATCH
-                    </span>
-                  </div>
-
-                  <div className="result-image">
-                    {car.image ? (
-                      <img
-                        src={car.image}
-                        alt={car.name}
-                      />
-                    ) : (
-                      <div className="image-placeholder">
-                        AUREN DRIVE
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="result-content">
-                    <div className="result-meta">
-                      <span>{car.body}</span>
-                      <span>{car.drive}</span>
-                      <span>{car.power}</span>
-                    </div>
-
-                    <h2>{car.name}</h2>
-
-                    <div className="result-price">
-                      {car.price}
-                    </div>
-
-                    <p className="result-why">
-                      {car.why}
-                    </p>
-
-                    <div className="result-columns">
-                      <div>
-                        <h4>Плюсы</h4>
-
-                        <ul>
-                          {(car.pros || []).map((item) => (
-                            <li key={item}>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4>Минусы</h4>
-
-                        <ul>
-                          {(car.cons || []).map((item) => (
-                            <li key={item}>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="buying-focus">
-                      <span>НА ЧТО СМОТРЕТЬ</span>
-
-                      <p>
-                        {car.buying_focus ||
-                          'Проверьте историю обслуживания и техническое состояние автомобиля.'}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <div className="results-disclaimer">
-            <span>DEMO DATABASE</span>
-
-            <p>
-              Текущая версия использует демонстрационную
-              базу моделей. Цены не являются актуальными
-              ценами реальных объявлений.
-            </p>
-          </div>
-
           <button
-            className="drive-primary results-reset"
+            className="drive-primary"
             onClick={reset}
           >
             Новый подбор →
@@ -503,40 +490,54 @@ function App() {
     return (
       <div className="drive-app">
         <header className="drive-header">
-          <button className="drive-logo" onClick={reset}>
-            <span>AUREN</span> DRIVE
+          <button
+            className="drive-logo"
+            onClick={
+              reset
+            }
+          >
+            <span>AUREN</span>{' '}
+            DRIVE
           </button>
 
           <div className="drive-header-label">
-            AI CAR FINDER
+            AI CAR RESEARCH
           </div>
         </header>
 
         <main className="drive-landing">
           <div className="landing-copy">
             <div className="landing-eyebrow">
-              AUREN DRIVE · AI CAR FINDER
+              AUREN DRIVE · LIVE
             </div>
 
             <h1>
-              Найдём автомобиль,
+              Найдём автомобиль
               <br />
-              который подходит
-              <span> именно вам.</span>
+              не по шаблону,
+              <br />
+              а по
+              <span>
+                {' '}
+                реальному рынку.
+              </span>
             </h1>
 
             <p>
-              Расскажите о бюджете, предпочтениях
-              и стиле езды. AUREN проанализирует
-              требования и подберёт подходящие
-              варианты.
+              AUREN анализирует ваши
+              требования, исследует
+              актуальную информацию
+              в интернете и сравнивает
+              найденные варианты.
             </p>
 
             <button
               className="drive-primary"
-              onClick={() => setStarted(true)}
+              onClick={() =>
+                setStarted(true)
+              }
             >
-              Начать подбор
+              Начать исследование
               <span>→</span>
             </button>
           </div>
@@ -546,19 +547,14 @@ function App() {
 
             <div className="landing-ring">
               <div className="ring-inner">
-                <span>AI</span>
-                <strong>DRIVE</strong>
+                <span>
+                  LIVE
+                </span>
+
+                <strong>
+                  SEARCH
+                </strong>
               </div>
-            </div>
-
-            <div className="floating-card card-one">
-              <small>AUREN SCORE</small>
-              <strong>94</strong>
-            </div>
-
-            <div className="floating-card card-two">
-              <small>AI MATCH</small>
-              <strong>97%</strong>
             </div>
           </div>
         </main>
@@ -569,8 +565,12 @@ function App() {
   return (
     <div className="drive-app">
       <header className="drive-header">
-        <button className="drive-logo" onClick={reset}>
-          <span>AUREN</span> DRIVE
+        <button
+          className="drive-logo"
+          onClick={reset}
+        >
+          <span>AUREN</span>{' '}
+          DRIVE
         </button>
 
         <div className="progress-wrap">
@@ -598,98 +598,164 @@ function App() {
             {question.number} / 08
           </div>
 
-          <h1>{question.title}</h1>
+          <h1>
+            {question.title}
+          </h1>
 
-          <p>{question.description}</p>
+          <p>
+            {
+              question.description
+            }
+          </p>
 
           <div className="options-grid">
-            {question.options.map((option, index) => {
-              const selectedOption =
-                selected.includes(option)
+            {question.options.map(
+              (
+                option,
+                index,
+              ) => {
+                const isSelected =
+                  selected.includes(
+                    option,
+                  )
 
-              return (
-                <button
-                  key={option}
-                  className={`option-card ${
-                    selectedOption ? 'selected' : ''
-                  }`}
-                  onClick={() => choose(option)}
-                >
-                  <span className="option-number">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+                return (
+                  <button
+                    key={option}
+                    className={`option-card ${
+                      isSelected
+                        ? 'selected'
+                        : ''
+                    }`}
+                    onClick={() =>
+                      selectOption(
+                        option,
+                      )
+                    }
+                  >
+                    <span className="option-number">
+                      {String(
+                        index +
+                          1,
+                      ).padStart(
+                        2,
+                        '0',
+                      )}
+                    </span>
 
-                  <strong>{option}</strong>
+                    <strong>
+                      {option}
+                    </strong>
 
-                  <span>
-                    {selectedOption ? '✓' : '→'}
-                  </span>
-                </button>
-              )
-            })}
+                    <span>
+                      {isSelected
+                        ? '✓'
+                        : '→'}
+                    </span>
+                  </button>
+                )
+              },
+            )}
           </div>
 
           {error && (
             <div className="ai-error">
-              <strong>AUREN DRIVE ERROR</strong>
-              <p>{error}</p>
+              <strong>
+                AUREN DRIVE ERROR
+              </strong>
+
+              <p>
+                {error}
+              </p>
             </div>
           )}
 
           {loading && (
             <div className="ai-processing">
-              AUREN анализирует параметры автомобиля...
+              AUREN исследует
+              интернет и
+              сравнивает
+              автомобили...
             </div>
           )}
 
           <div className="question-actions">
             <button
               className="back-button"
-              disabled={step === 0 || loading}
-              onClick={back}
+              disabled={
+                loading
+              }
+              onClick={
+                back
+              }
             >
               ← Назад
             </button>
 
             <button
               className="drive-primary"
-              disabled={!selected.length || loading}
-              onClick={next}
+              disabled={
+                !selected.length ||
+                loading
+              }
+              onClick={
+                next
+              }
             >
               {loading
-                ? 'Анализируем...'
-                : step === questions.length - 1
-                  ? 'Получить рекомендации'
+                ? 'Исследуем...'
+                : step ===
+                    questions.length -
+                      1
+                  ? 'Запустить исследование'
                   : 'Продолжить'}
 
-              <span>→</span>
+              <span>
+                →
+              </span>
             </button>
           </div>
         </section>
 
         <aside className="question-side">
           <span className="side-label">
-            AUREN DRIVE
+            LIVE WEB RESEARCH
           </span>
 
           <strong className="side-big-number">
-            {question.number}
+            {
+              question.number
+            }
           </strong>
 
           <p>
-            Чем точнее ответы,
-            тем точнее итоговый подбор.
+            На последнем
+            шаге AUREN
+            исследует
+            актуальную
+            информацию
+            в интернете.
           </p>
 
           <div className="side-progress">
-            {questions.map((item, index) => (
-              <span
-                key={item.id}
-                className={
-                  index <= step ? 'active' : ''
-                }
-              />
-            ))}
+            {questions.map(
+              (
+                item,
+                index,
+              ) => (
+                <span
+                  key={
+                    item.id
+                  }
+                  className={
+                    index <=
+                    step
+                      ? 'active'
+                      : ''
+                  }
+                />
+              ),
+            )}
           </div>
         </aside>
       </main>
