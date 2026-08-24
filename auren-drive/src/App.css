@@ -952,3 +952,71 @@ button:disabled {
   font-weight: 900;
   letter-spacing: 3px;
 }
+.ai-result {
+  margin-top: 40px;
+  padding: 40px;
+  border: 1px solid #292929;
+  border-radius: 18px;
+  background: #0d0d0d;
+}
+
+.ai-result-label {
+  margin-bottom: 25px;
+  color: #ff6a00;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.ai-result-text {
+  color: #ddd;
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sources-box {
+  margin-top: 30px;
+  padding: 30px;
+  border: 1px solid #292929;
+  border-radius: 18px;
+  background: #0d0d0d;
+}
+
+.sources-box h2 {
+  margin: 12px 0 25px;
+}
+
+.sources-list {
+  display: grid;
+  gap: 10px;
+}
+
+.source-row {
+  display: grid;
+  grid-template-columns:
+    40px
+    120px
+    minmax(0, 1fr);
+  gap: 15px;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #242424;
+  border-radius: 10px;
+}
+
+.source-row span {
+  color: #ff6a00;
+  font-size: 10px;
+}
+
+.source-row strong {
+  color: #ddd;
+}
+
+.source-row small {
+  overflow: hidden;
+  color: #666;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

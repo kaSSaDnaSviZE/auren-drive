@@ -17,12 +17,13 @@ const questions = [
       '10+ млн ₽',
     ],
   },
+
   {
     id: 'condition',
     number: '02',
-    title: 'Новый или б/у?',
+    title: 'Какой автомобиль вы рассматриваете?',
     description:
-      'Какой возраст автомобиля вы рассматриваете?',
+      'Новый или автомобиль с пробегом?',
     options: [
       'Новый',
       'Б/у до 3 лет',
@@ -31,12 +32,13 @@ const questions = [
       'Возраст не важен',
     ],
   },
+
   {
     id: 'body',
     number: '03',
     title: 'Какой кузов вам нравится?',
     description:
-      'Можно выбрать несколько.',
+      'Можно выбрать несколько вариантов.',
     multi: true,
     options: [
       'Седан',
@@ -48,12 +50,13 @@ const questions = [
       'Не имеет значения',
     ],
   },
+
   {
     id: 'priority',
     number: '04',
     title: 'Что для вас важнее всего?',
     description:
-      'Можно выбрать несколько приоритетов.',
+      'Выберите несколько приоритетов.',
     multi: true,
     options: [
       'Динамика',
@@ -66,10 +69,11 @@ const questions = [
       'Технологичность',
     ],
   },
+
   {
     id: 'power',
     number: '05',
-    title: 'Какую динамику хотите?',
+    title: 'Какую динамику вы хотите?',
     description:
       'От спокойной езды до максимальной динамики.',
     options: [
@@ -80,12 +84,13 @@ const questions = [
       'Мне нужна максимальная динамика',
     ],
   },
+
   {
     id: 'drive',
     number: '06',
     title: 'Какой привод предпочитаете?',
     description:
-      'Можно выбрать несколько.',
+      'Можно выбрать несколько вариантов.',
     multi: true,
     options: [
       'Передний',
@@ -94,6 +99,7 @@ const questions = [
       'Не имеет значения',
     ],
   },
+
   {
     id: 'fuel',
     number: '07',
@@ -107,12 +113,13 @@ const questions = [
       'Главное — динамика',
     ],
   },
+
   {
     id: 'brand',
     number: '08',
     title: 'Есть любимые марки?',
     description:
-      'Выберите несколько или любую.',
+      'Выберите несколько или любую марку.',
     multi: true,
     options: [
       'BMW',
@@ -128,34 +135,19 @@ const questions = [
 ]
 
 function App() {
-  const [started, setStarted] =
-    useState(false)
-
-  const [step, setStep] =
-    useState(0)
-
-  const [answers, setAnswers] =
-    useState({})
-
-  const [loading, setLoading] =
-    useState(false)
-
-  const [answer, setAnswer] =
-    useState('')
-
-  const [sources, setSources] =
+  const [started, setStarted] = useState(false)
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState({})
+  const [answer, setAnswer] = useState('')
+  const [executedTools, setExecutedTools] =
     useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const [error, setError] =
-    useState('')
+  const question = questions[step]
+  const selected = answers[question.id] || []
 
-  const question =
-    questions[step]
-
-  const selected =
-    answers[question.id] || []
-
-  function selectOption(option) {
+  const selectOption = (option) => {
     setError('')
 
     if (!question.multi) {
@@ -217,7 +209,7 @@ function App() {
     })
   }
 
-  async function runResearch() {
+  const runResearch = async () => {
     if (
       !selected.length ||
       loading
@@ -227,87 +219,89 @@ function App() {
 
     const finalAnswers = {
       ...answers,
-      [question.id]:
-        selected,
+      [question.id]: selected,
     }
 
     setAnswers(finalAnswers)
     setLoading(true)
     setError('')
     setAnswer('')
-    setSources([])
+    setExecutedTools([])
 
     const controller =
       new AbortController()
 
-    const timeout =
-      setTimeout(() => {
+    const timeout = setTimeout(
+      () => {
         controller.abort()
-      }, 30000)
+      },
+      60000,
+    )
 
     try {
       const response =
-        await fetch(
-          '/api/recommend',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type':
-                'application/json',
-              Accept:
-                'application/json',
-            },
-            body: JSON.stringify({
-              answers:
-                finalAnswers,
-            }),
-            signal:
-              controller.signal,
+        await fetch('/api/recommend', {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json',
+            Accept:
+              'application/json',
           },
-        )
+          body: JSON.stringify({
+            answers: finalAnswers,
+          }),
+          signal:
+            controller.signal,
+        })
 
-      const text =
+      const raw =
         await response.text()
 
-      let data
+      let data = {}
 
       try {
-        data = text
-          ? JSON.parse(text)
+        data = raw
+          ? JSON.parse(raw)
           : {}
       } catch {
         throw new Error(
-          `API returned invalid JSON: ${text.slice(
+          `Сервер вернул некорректный ответ:\n${raw.slice(
             0,
-            400,
+            500,
           )}`,
         )
       }
 
       if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            `API ${response.status}`,
-        )
+        const apiError =
+          typeof data?.error === 'string'
+            ? data.error
+            : data?.error?.message ||
+              JSON.stringify(
+                data?.error,
+              ) ||
+              `API ошибка ${response.status}`
+
+        throw new Error(apiError)
       }
 
       if (
-        !data.answer
+        typeof data?.answer !==
+        'string'
       ) {
         throw new Error(
-          'AUREN returned an empty research result',
+          'AUREN не вернул текст исследования',
         )
       }
 
-      setAnswer(
-        data.answer,
-      )
+      setAnswer(data.answer)
 
-      setSources(
+      setExecutedTools(
         Array.isArray(
-          data.sources,
+          data.executed_tools,
         )
-          ? data.sources
+          ? data.executed_tools
           : [],
       )
     } catch (err) {
@@ -321,7 +315,7 @@ function App() {
         'AbortError'
       ) {
         setError(
-          'Веб-исследование заняло больше 30 секунд. Попробуйте ещё раз.',
+          'Исследование заняло больше 60 секунд. Попробуйте ещё раз.',
         )
       } else {
         setError(
@@ -335,7 +329,7 @@ function App() {
     }
   }
 
-  function next() {
+  const next = () => {
     if (
       !selected.length ||
       loading
@@ -357,8 +351,10 @@ function App() {
     )
   }
 
-  function back() {
-    if (loading) return
+  const back = () => {
+    if (loading) {
+      return
+    }
 
     if (step > 0) {
       setStep(
@@ -370,14 +366,14 @@ function App() {
     }
   }
 
-  function reset() {
+  const reset = () => {
     setStarted(false)
     setStep(0)
     setAnswers({})
     setAnswer('')
-    setSources([])
-    setError('')
+    setExecutedTools([])
     setLoading(false)
+    setError('')
   }
 
   if (answer) {
@@ -388,8 +384,7 @@ function App() {
             className="drive-logo"
             onClick={reset}
           >
-            <span>AUREN</span>{' '}
-            DRIVE
+            <span>AUREN</span> DRIVE
           </button>
 
           <button
@@ -402,7 +397,7 @@ function App() {
 
         <main className="results-page">
           <div className="landing-eyebrow">
-            AUREN DRIVE · WEB RESEARCH
+            AUREN DRIVE · LIVE RESEARCH
           </div>
 
           <h1>
@@ -413,7 +408,7 @@ function App() {
 
           <section className="ai-result">
             <div className="ai-result-label">
-              LIVE WEB RESEARCH
+              INTERNET RESEARCH
             </div>
 
             <div className="ai-result-text">
@@ -421,54 +416,48 @@ function App() {
             </div>
           </section>
 
-          {sources.length >
+          {executedTools.length >
             0 && (
             <section className="sources-box">
               <div className="landing-eyebrow">
-                SOURCES
+                WEB ACTIVITY
               </div>
 
               <h2>
-                Использованные
-                источники
+                Что исследовал AUREN
               </h2>
 
               <div className="sources-list">
-                {sources.map(
+                {executedTools.map(
                   (
-                    source,
+                    tool,
                     index,
                   ) => (
-                    <a
-                      key={`${source.url}-${index}`}
-                      href={
-                        source.url
-                      }
-                      target="_blank"
-                      rel="noreferrer"
+                    <div
+                      key={index}
+                      className="source-row"
                     >
                       <span>
-                        0
-                        {index +
-                          1}
+                        {String(
+                          index + 1,
+                        ).padStart(
+                          2,
+                          '0',
+                        )}
                       </span>
 
                       <strong>
-                        {
-                          source.title
-                        }
+                        {tool?.type ||
+                          'web search'}
                       </strong>
 
                       <small>
-                        {
-                          source.url
-                        }
+                        {tool
+                          ?.arguments ||
+                          tool?.output ||
+                          ''}
                       </small>
-
-                      <b>
-                        →
-                      </b>
-                    </a>
+                    </div>
                   ),
                 )}
               </div>
@@ -492,16 +481,13 @@ function App() {
         <header className="drive-header">
           <button
             className="drive-logo"
-            onClick={
-              reset
-            }
+            onClick={reset}
           >
-            <span>AUREN</span>{' '}
-            DRIVE
+            <span>AUREN</span> DRIVE
           </button>
 
           <div className="drive-header-label">
-            AI CAR RESEARCH
+            LIVE WEB AI
           </div>
         </header>
 
@@ -514,21 +500,20 @@ function App() {
             <h1>
               Найдём автомобиль
               <br />
-              не по шаблону,
+              по реальному
               <br />
-              а по
               <span>
-                {' '}
-                реальному рынку.
+                рынку.
               </span>
             </h1>
 
             <p>
-              AUREN анализирует ваши
-              требования, исследует
-              актуальную информацию
-              в интернете и сравнивает
-              найденные варианты.
+              AUREN изучит ваши
+              требования, выполнит
+              веб-поиск, сравнит
+              найденную информацию
+              и сформирует
+              персональные рекомендации.
             </p>
 
             <button
@@ -547,10 +532,7 @@ function App() {
 
             <div className="landing-ring">
               <div className="ring-inner">
-                <span>
-                  LIVE
-                </span>
-
+                <span>LIVE</span>
                 <strong>
                   SEARCH
                 </strong>
@@ -569,8 +551,7 @@ function App() {
           className="drive-logo"
           onClick={reset}
         >
-          <span>AUREN</span>{' '}
-          DRIVE
+          <span>AUREN</span> DRIVE
         </button>
 
         <div className="progress-wrap">
@@ -603,9 +584,7 @@ function App() {
           </h1>
 
           <p>
-            {
-              question.description
-            }
+            {question.description}
           </p>
 
           <div className="options-grid">
@@ -673,8 +652,7 @@ function App() {
           {loading && (
             <div className="ai-processing">
               AUREN исследует
-              интернет и
-              сравнивает
+              интернет и сравнивает
               автомобили...
             </div>
           )}
@@ -682,12 +660,8 @@ function App() {
           <div className="question-actions">
             <button
               className="back-button"
-              disabled={
-                loading
-              }
-              onClick={
-                back
-              }
+              disabled={loading}
+              onClick={back}
             >
               ← Назад
             </button>
@@ -698,9 +672,7 @@ function App() {
                 !selected.length ||
                 loading
               }
-              onClick={
-                next
-              }
+              onClick={next}
             >
               {loading
                 ? 'Исследуем...'
@@ -710,9 +682,7 @@ function App() {
                   ? 'Запустить исследование'
                   : 'Продолжить'}
 
-              <span>
-                →
-              </span>
+              <span>→</span>
             </button>
           </div>
         </section>
@@ -723,18 +693,15 @@ function App() {
           </span>
 
           <strong className="side-big-number">
-            {
-              question.number
-            }
+            {question.number}
           </strong>
 
           <p>
-            На последнем
-            шаге AUREN
-            исследует
-            актуальную
-            информацию
-            в интернете.
+            На последнем шаге
+            AUREN самостоятельно
+            использует веб-поиск
+            для актуального
+            исследования.
           </p>
 
           <div className="side-progress">
@@ -744,12 +711,9 @@ function App() {
                 index,
               ) => (
                 <span
-                  key={
-                    item.id
-                  }
+                  key={item.id}
                   className={
-                    index <=
-                    step
+                    index <= step
                       ? 'active'
                       : ''
                   }
