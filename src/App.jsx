@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import porscheImg from './assets/porsche.jpg'
 
-const WHATSAPP_NUMBER = '994XXXXXXXXX'
+const WHATSAPP_NUMBER = '994554750060'
 
 const services = [
   {
@@ -77,16 +77,16 @@ const trustItems = [
     label: 'уровень сервиса',
   },
   {
-    value: 'INDIVIDUAL',
-    label: 'подход к каждому авто',
-  },
-  {
     value: 'BAKU',
-    label: 'локация сервиса',
+    label: 'локация',
   },
   {
     value: '24/7',
     label: 'приём заявок онлайн',
+  },
+  {
+    value: 'INDIVIDUAL',
+    label: 'подход к каждому авто',
   },
 ]
 
@@ -126,6 +126,10 @@ function App() {
     setMobileMenuOpen((previous) => !previous)
   }
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+  }
+
   const handleChange = (event) => {
     const { name, value } = event.target
 
@@ -139,7 +143,7 @@ function App() {
     event.preventDefault()
 
     const message = [
-      'Здравствуйте! Хочу записаться в BAKU AUTO LAB.',
+      'Здравствуйте! Хочу записаться в AUREN AUTO LAB.',
       '',
       `Имя: ${form.name}`,
       `Телефон: ${form.phone}`,
@@ -155,15 +159,11 @@ function App() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false)
-  }
-
   return (
     <div className="site">
       <header className="header">
         <a href="#top" className="logo" onClick={closeMobileMenu}>
-          <span>BAKU</span> AUTO LAB
+          <span>AUREN</span> AUTO LAB
         </a>
 
         <nav className="desktop-nav">
@@ -181,7 +181,6 @@ function App() {
           className={`menu-button ${mobileMenuOpen ? 'active' : ''}`}
           onClick={toggleMobileMenu}
           aria-label="Открыть меню"
-          aria-expanded={mobileMenuOpen}
         >
           <span></span>
           <span></span>
@@ -191,21 +190,10 @@ function App() {
 
       {mobileMenuOpen && (
         <div className="mobile-menu">
-          <a href="#services" onClick={closeMobileMenu}>
-            Услуги
-          </a>
-
-          <a href="#works" onClick={closeMobileMenu}>
-            Работы
-          </a>
-
-          <a href="#about" onClick={closeMobileMenu}>
-            О нас
-          </a>
-
-          <a href="#contacts" onClick={closeMobileMenu}>
-            Контакты
-          </a>
+          <a href="#services" onClick={closeMobileMenu}>Услуги</a>
+          <a href="#works" onClick={closeMobileMenu}>Работы</a>
+          <a href="#about" onClick={closeMobileMenu}>О нас</a>
+          <a href="#contacts" onClick={closeMobileMenu}>Контакты</a>
 
           <button className="primary-button" onClick={openBooking}>
             Записаться →
@@ -214,7 +202,6 @@ function App() {
       )}
 
       <main id="top">
-        {/* HERO */}
         <section className="hero">
           <div className="hero-content reveal">
             <p className="eyebrow">PREMIUM AUTO SERVICE · BAKU</p>
@@ -272,13 +259,12 @@ function App() {
             </div>
 
             <div className="visual-label">
-              <span>BAKU AUTO LAB</span>
+              <span>AUREN AUTO LAB</span>
               <strong>01</strong>
             </div>
           </div>
         </section>
 
-        {/* SERVICES */}
         <section className="services" id="services">
           <div className="section-heading">
             <p className="eyebrow">ЧТО МЫ ДЕЛАЕМ</p>
@@ -323,7 +309,6 @@ function App() {
           </div>
         </section>
 
-        {/* WORKS */}
         <section className="works" id="works">
           <div className="works-heading">
             <div>
@@ -366,16 +351,15 @@ function App() {
           </div>
 
           <div className="demo-note">
-            <span>DEMO PROJECT</span>
+            <span>PORTFOLIO DEMO</span>
             <p>
-              Сейчас используются демонстрационные изображения. Для
-              реального клиента сюда добавляются его автомобили и настоящие
-              результаты работ.
+              Демонстрационный проект AUREN AUTO LAB. Фотографии и
+              коммерческие данные будут заменены на реальные материалы
+              клиента перед публикацией.
             </p>
           </div>
         </section>
 
-        {/* TRUST */}
         <section className="trust">
           <div className="trust-heading">
             <p className="eyebrow">ПОЧЕМУ НАМ ДОВЕРЯЮТ</p>
@@ -397,10 +381,9 @@ function App() {
           </div>
         </section>
 
-        {/* ABOUT */}
         <section className="about" id="about">
           <div>
-            <p className="eyebrow">BAKU AUTO LAB</p>
+            <p className="eyebrow">AUREN AUTO LAB</p>
 
             <h2>
               Мы не просто
@@ -416,9 +399,8 @@ function App() {
           </p>
         </section>
 
-        {/* CONTACT */}
         <section className="contact" id="contacts">
-          <p className="eyebrow">ГОТОВЫ НАЧАТЬ?</p>
+          <p className="eyebrow">КОНТАКТЫ</p>
 
           <h2>
             Вернём вашему
@@ -426,8 +408,34 @@ function App() {
             <span>автомобилю блеск.</span>
           </h2>
 
-          <p className="contact-text">
-            Оставьте заявку, и мы свяжемся с вами для уточнения деталей.
+          <div className="contact-grid">
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer">
+              <span>WhatsApp</span>
+              <strong>+994 55 475 00 60</strong>
+            </a>
+
+            <a
+              href="https://instagram.com/KASSADnaSviZE"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span>Instagram</span>
+              <strong>@KASSADnaSviZE</strong>
+            </a>
+
+            <div>
+              <span>Локация</span>
+              <strong>Babək prospekti · Bakı</strong>
+            </div>
+
+            <div>
+              <span>График</span>
+              <strong>Пн–Сб · 09:00–21:00</strong>
+            </div>
+          </div>
+
+          <p className="demo-address">
+            Demo Location · Bakı, Azərbaycan
           </p>
 
           <button className="primary-button" onClick={openBooking}>
@@ -438,13 +446,16 @@ function App() {
 
       <footer>
         <div className="logo">
-          <span>BAKU</span> AUTO LAB
+          <span>AUREN</span> AUTO LAB
         </div>
 
-        <p>Premium automotive care · Baku, Azerbaijan</p>
+        <p>Premium automotive care · Baku, Azerbaijan · Portfolio Demo</p>
       </footer>
 
-      {/* BOOKING */}
+      <button className="mobile-booking" onClick={openBooking}>
+        Записаться
+      </button>
+
       {isBookingOpen && (
         <div className="modal-backdrop" onMouseDown={closeBooking}>
           <div
@@ -534,7 +545,6 @@ function App() {
         </div>
       )}
 
-      {/* CASE STUDY */}
       {selectedWork && (
         <div className="case-backdrop" onMouseDown={closeWork}>
           <div
