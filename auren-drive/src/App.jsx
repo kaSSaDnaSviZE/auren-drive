@@ -77,7 +77,7 @@ const questions = [
       'Бодрая',
       'Быстрая',
       'Очень быстрая',
-      'Мне нужна максимальная динамика',
+      'Максимальная динамика',
     ],
   },
   {
@@ -127,72 +127,28 @@ const questions = [
   },
 ]
 
-const fallbackImages = {
-  BMW:
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1800&q=88',
-  Mercedes:
-    'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1800&q=88',
-  Porsche:
-    'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1800&q=88',
-  Audi:
-    'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1800&q=88',
-  Toyota:
-    'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=1800&q=88',
-  Lexus:
-    'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1800&q=88',
-  default:
-    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1800&q=88',
-}
-
-function imageForCar(car) {
-  if (
-    car.photoUrl &&
-    /^https?:\/\//i.test(
-      car.photoUrl,
-    )
-  ) {
-    return car.photoUrl
-  }
-
-  const brand =
-    Object.keys(fallbackImages).find(
-      (item) =>
-        item !== 'default' &&
-        car.name
-          ?.toLowerCase()
-          .includes(
-            item.toLowerCase(),
-          ),
-    )
-
-  return (
-    fallbackImages[brand] ||
-    fallbackImages.default
-  )
-}
-
-function validUrl(value) {
-  return (
-    typeof value === 'string' &&
-    /^https?:\/\//i.test(value)
-  )
-}
-
 function App() {
   const [started, setStarted] =
     useState(false)
+
   const [step, setStep] =
     useState(0)
+
   const [answers, setAnswers] =
     useState({})
+
   const [cars, setCars] =
     useState([])
+
   const [best, setBest] =
     useState('')
+
   const [bestReason, setBestReason] =
     useState('')
+
   const [loading, setLoading] =
     useState(false)
+
   const [error, setError] =
     useState('')
 
@@ -202,7 +158,7 @@ function App() {
   const selected =
     answers[question.id] || []
 
-  const selectOption = (option) => {
+  function choose(option) {
     setError('')
 
     if (!question.multi) {
@@ -218,39 +174,49 @@ function App() {
         prev[question.id] || []
 
       if (
-        question.id === 'brand' &&
-        option === 'Любая марка'
+        question.id ===
+          'brand' &&
+        option ===
+          'Любая марка'
       ) {
         return {
           ...prev,
           [question.id]:
-            current.includes(option)
+            current.includes(
+              option,
+            )
               ? []
               : ['Любая марка'],
         }
       }
 
       if (
-        question.id === 'brand' &&
+        question.id ===
+          'brand' &&
         current.includes(
           'Любая марка',
         )
       ) {
         return {
           ...prev,
-          [question.id]: [option],
+          [question.id]: [
+            option,
+          ],
         }
       }
 
       if (
-        current.includes(option)
+        current.includes(
+          option,
+        )
       ) {
         return {
           ...prev,
           [question.id]:
             current.filter(
               (item) =>
-                item !== option,
+                item !==
+                option,
             ),
         }
       }
@@ -265,7 +231,7 @@ function App() {
     })
   }
 
-  const runResearch = async () => {
+  async function research() {
     if (
       !selected.length ||
       loading
@@ -282,6 +248,7 @@ function App() {
     setAnswers(
       finalAnswers,
     )
+
     setLoading(true)
     setError('')
     setCars([])
@@ -306,8 +273,6 @@ function App() {
             method: 'POST',
             headers: {
               'Content-Type':
-                'application/json',
-              Accept:
                 'application/json',
             },
             body: JSON.stringify({
@@ -339,7 +304,8 @@ function App() {
           typeof data?.error ===
             'string'
             ? data.error
-            : data?.error?.message ||
+            : data?.error
+                ?.message ||
                 `API ${response.status}`,
         )
       }
@@ -350,38 +316,36 @@ function App() {
         )
       ) {
         throw new Error(
-          'AUREN не вернул список автомобилей.',
+          'AUREN не вернул автомобили.',
         )
       }
 
-      setCars(data.cars)
+      setCars(
+        data.cars.slice(
+          0,
+          3,
+        ),
+      )
+
       setBest(
         data.best || '',
       )
+
       setBestReason(
         data.bestReason || '',
       )
     } catch (err) {
-      if (
-        err?.name ===
-        'AbortError'
-      ) {
-        setError(
-          'Поиск занял больше 60 секунд.',
-        )
-      } else {
-        setError(
-          err?.message ||
-            'Не удалось выполнить поиск.',
-        )
-      }
+      setError(
+        err?.message ||
+          'Ошибка поиска.',
+      )
     } finally {
       clearTimeout(timeout)
       setLoading(false)
     }
   }
 
-  const next = () => {
+  function next() {
     if (
       !selected.length ||
       loading
@@ -393,7 +357,7 @@ function App() {
       step ===
       questions.length - 1
     ) {
-      runResearch()
+      research()
       return
     }
 
@@ -403,7 +367,7 @@ function App() {
     )
   }
 
-  const back = () => {
+  function back() {
     if (loading) return
 
     if (step > 0) {
@@ -411,25 +375,26 @@ function App() {
         (value) =>
           value - 1,
       )
-    } else {
-      setStarted(false)
+      return
     }
+
+    setStarted(false)
   }
 
-  const reset = () => {
+  function reset() {
     setStarted(false)
     setStep(0)
     setAnswers({})
     setCars([])
     setBest('')
     setBestReason('')
-    setLoading(false)
     setError('')
+    setLoading(false)
   }
 
   if (cars.length > 0) {
     return (
-      <div className="drive-shell results-mode">
+      <div className="drive-shell">
         <header className="topbar">
           <button
             className="logo"
@@ -456,7 +421,8 @@ function App() {
           <section className="results-hero">
             <div>
               <div className="eyebrow">
-                AUREN DRIVE · TOP MATCHES
+                AUREN DRIVE · TOP
+                MATCHES
               </div>
 
               <h1>
@@ -471,9 +437,9 @@ function App() {
 
               <p>
                 AUREN исследовал
-                актуальную информацию
-                и сформировал
-                персональный TOP-3.
+                актуальные данные
+                и подобрал наиболее
+                подходящие варианты.
               </p>
             </div>
 
@@ -519,80 +485,117 @@ function App() {
                 </p>
               </div>
 
-              <div className="best-score">
-                <span>
-                  TOP
-                </span>
-                <strong>
-                  01
-                </strong>
-              </div>
+              <strong className="best-number">
+                01
+              </strong>
             </section>
           )}
 
           <section className="car-results-grid">
-            {cars
-              .slice(0, 3)
-              .map((car, index) => (
+            {cars.map(
+              (
+                car,
+                index,
+              ) => (
                 <article
                   className="car-result-card"
                   key={
-                    car.id ||
-                    `${car.name}-${index}`
+                    car.id
                   }
                 >
                   <div className="car-result-image">
-                    <img
-                      src={imageForCar(
-                        car,
-                      )}
-                      alt={car.name}
-                      onError={(
-                        event,
-                      ) => {
-                        event.currentTarget.src =
-                          fallbackImages.default
-                      }}
-                    />
+                    {car.photoUrl ? (
+                      <img
+                        src={
+                          car.photoUrl
+                        }
+                        alt={
+                          car.name
+                        }
+                        onError={(
+                          event,
+                        ) => {
+                          event.currentTarget.style.display =
+                            'none'
+                          event.currentTarget.parentElement.classList.add(
+                            'no-photo',
+                          )
+                        }}
+                      />
+                    ) : (
+                      <div className="no-photo-content">
+                        <span>
+                          AUREN
+                          DRIVE
+                        </span>
 
-                    <div className="image-shade" />
+                        <strong>
+                          {
+                            car.name
+                          }
+                        </strong>
 
-                    <span className="card-rank">
-                      0
-                      {index + 1}
-                    </span>
-
-                    <span className="verified-tag">
-                      AI MATCH
-                    </span>
-                  </div>
-
-                  <div className="car-result-content">
-                    <div className="result-overline">
-                      TOP{' '}
-                      {index + 1}
-                    </div>
-
-                    <h2>
-                      {car.name}
-                    </h2>
-
-                    {car.price && (
-                      <div className="result-big-price">
-                        {car.price}
+                        <small>
+                          Фото из
+                          источника
+                          не найдено
+                        </small>
                       </div>
                     )}
 
+                    <span className="rank-badge">
+                      0
+                      {index +
+                        1}
+                    </span>
+
+                    {car.hasRealPhoto && (
+                      <span className="photo-badge">
+                        SOURCE PHOTO
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="car-content">
+                    <div className="card-topline">
+                      TOP{' '}
+                      {index +
+                        1}
+
+                      {car.hasRealListing && (
+                        <span>
+                          REAL
+                          LISTING
+                        </span>
+                      )}
+                    </div>
+
+                    <h2>
+                      {
+                        car.name
+                      }
+                    </h2>
+
+                    <div className="car-price">
+                      {
+                        car.price ||
+                        'Цена не определена'
+                      }
+                    </div>
+
                     {car.specs && (
-                      <div className="spec-line">
-                        {car.specs}
+                      <div className="car-specs">
+                        {
+                          car.specs
+                        }
                       </div>
                     )}
 
                     {car.why && (
-                      <section className="result-block highlight">
+                      <section className="info-block accent">
                         <span>
-                          ПОЧЕМУ ПОДХОДИТ
+                          ПОЧЕМУ
+                          ПОДХОДИТ
                         </span>
 
                         <p>
@@ -603,9 +606,9 @@ function App() {
                       </section>
                     )}
 
-                    <div className="two-column-blocks">
+                    <div className="two-blocks">
                       {car.pros && (
-                        <section className="result-block">
+                        <section className="info-block">
                           <span>
                             ПЛЮСЫ
                           </span>
@@ -619,7 +622,7 @@ function App() {
                       )}
 
                       {car.cons && (
-                        <section className="result-block">
+                        <section className="info-block">
                           <span>
                             МИНУСЫ
                           </span>
@@ -634,9 +637,9 @@ function App() {
                     </div>
 
                     {car.problems && (
-                      <section className="result-block warning-block">
+                      <section className="info-block">
                         <span>
-                          ТИПИЧНЫЕ ПРОБЛЕМЫ
+                          ПРОБЛЕМЫ
                         </span>
 
                         <p>
@@ -648,9 +651,10 @@ function App() {
                     )}
 
                     {car.check && (
-                      <section className="result-block">
+                      <section className="info-block">
                         <span>
-                          ЧТО ПРОВЕРИТЬ
+                          ЧТО
+                          ПРОВЕРИТЬ
                         </span>
 
                         <p>
@@ -662,66 +666,78 @@ function App() {
                     )}
 
                     <div className="card-actions">
-                      {validUrl(
-                        car.listingUrl,
-                      ) && (
+                      {car.listingUrl && (
                         <a
+                          className="orange-btn"
                           href={
                             car.listingUrl
                           }
                           target="_blank"
                           rel="noreferrer"
-                          className="orange-btn card-btn"
                         >
-                          Открыть объявление
+                          Реальное
+                          объявление
                           <span>
                             ↗
                           </span>
                         </a>
                       )}
 
-                      {validUrl(
-                        car.sourceUrl,
-                      ) && (
-                        <a
-                          href={
-                            car.sourceUrl
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="secondary-btn card-source"
-                        >
-                          Источник
-                        </a>
-                      )}
+                      {car.sourceUrl &&
+                        car.sourceUrl !==
+                          car.listingUrl && (
+                          <a
+                            className="secondary-btn"
+                            href={
+                              car.sourceUrl
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Источник
+                          </a>
+                        )}
                     </div>
+
+                    {!car.listingUrl && (
+                      <div className="source-warning">
+                        Конкретное
+                        объявление не
+                        найдено. AUREN
+                        не создаёт
+                        фиктивную ссылку.
+                      </div>
+                    )}
                   </div>
                 </article>
-              ))}
+              ),
+            )}
           </section>
 
           <section className="research-note">
             <div>
               <div className="eyebrow">
-                AUREN RESEARCH
+                DATA POLICY
               </div>
 
               <h2>
-                Живой поиск,
+                Только реальные
                 <br />
-                а не статичная база.
+                источники.
               </h2>
             </div>
 
             <p>
-              Фото, цены и ссылки
-              отображаются только
-              при наличии данных
-              в найденных источниках.
-              Если конкретное фото
-              или объявление не было
-              найдено, AUREN не
-              выдумывает его.
+              AUREN больше не
+              генерирует ссылки на
+              объявления самостоятельно.
+              Ссылка появляется только
+              тогда, когда она пришла
+              из реального результата
+              веб-поиска. Фото также
+              берётся со страницы
+              источника, когда это
+              технически возможно.
             </p>
           </section>
 
@@ -755,34 +771,36 @@ function App() {
         </header>
 
         <main className="hero-screen">
-          <div className="hero-copy">
+          <section className="hero-copy">
             <div className="eyebrow">
-              AUREN DRIVE · AI CAR FINDER
+              AUREN DRIVE · AI CAR
+              FINDER
             </div>
 
             <h1>
-              Не знаете,
+              Найдём машину
               <br />
-              какую машину
+              которая подходит
               <br />
               <span>
-                купить?
+                именно вам.
               </span>
             </h1>
 
             <p>
-              Расскажите о бюджете,
-              предпочтениях и
-              стиле езды. AUREN
-              исследует рынок
-              и подбирает варианты
-              специально под вас.
+              Бюджет, стиль езды,
+              надёжность, комфорт.
+              AUREN исследует рынок
+              и сравнивает актуальные
+              данные.
             </p>
 
             <button
               className="orange-btn large"
               onClick={() =>
-                setStarted(true)
+                setStarted(
+                  true,
+                )
               }
             >
               Начать подбор
@@ -790,41 +808,21 @@ function App() {
                 →
               </span>
             </button>
-          </div>
+          </section>
 
-          <div className="hero-orbit">
-            <div className="orbit-grid" />
+          <section className="hero-visual">
+            <div className="hero-orbit" />
 
-            <div className="orbit-circle">
+            <div className="hero-circle">
               <span>
-                AUREN
+                LIVE
               </span>
 
               <strong>
                 DRIVE
               </strong>
             </div>
-
-            <div className="orbit-card orbit-one">
-              <small>
-                WEB SEARCH
-              </small>
-
-              <strong>
-                LIVE
-              </strong>
-            </div>
-
-            <div className="orbit-card orbit-two">
-              <small>
-                MATCH
-              </small>
-
-              <strong>
-                97%
-              </strong>
-            </div>
-          </div>
+          </section>
         </main>
       </div>
     )
@@ -843,8 +841,7 @@ function App() {
 
         <div className="progress-wide">
           <span>
-            {question.number}
-            {' '}
+            {question.number}{' '}
             / 08
           </span>
 
@@ -865,8 +862,7 @@ function App() {
       <main className="quiz-screen">
         <section className="quiz-main">
           <div className="eyebrow">
-            {question.number}
-            {' '}
+            {question.number}{' '}
             / 08
           </div>
 
@@ -876,7 +872,7 @@ function App() {
             }
           </h1>
 
-          <p className="quiz-description">
+          <p>
             {
               question.description
             }
@@ -904,7 +900,7 @@ function App() {
                         : ''
                     }`}
                     onClick={() =>
-                      selectOption(
+                      choose(
                         option,
                       )
                     }
@@ -952,12 +948,13 @@ function App() {
 
           {loading && (
             <div className="loading-box">
-              AUREN исследует
-              интернет...
+              AUREN ищет реальные
+              источники и
+              фотографии...
             </div>
           )}
 
-          <div className="quiz-footer-actions">
+          <div className="quiz-actions">
             <button
               className="back-btn"
               onClick={back}
@@ -979,9 +976,9 @@ function App() {
               }
             >
               {loading
-                ? 'Исследуем...'
+                ? 'Ищем...'
                 : step === 7
-                  ? 'Запустить исследование'
+                  ? 'Найти автомобили'
                   : 'Продолжить'}
 
               <span>
@@ -992,21 +989,24 @@ function App() {
         </section>
 
         <aside className="quiz-aside">
-          <div className="giant-step">
+          <strong>
             {
               question.number
             }
-          </div>
+          </strong>
 
           <div>
             <div className="eyebrow">
-              LIVE WEB RESEARCH
+              LIVE SEARCH
             </div>
 
             <p>
-              Последний этап
-              запустит реальный
-              веб-поиск.
+              AUREN будет
+              использовать
+              реальные результаты
+              поиска, а не
+              выдумывать
+              объявления.
             </p>
           </div>
         </aside>
