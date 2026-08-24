@@ -32,7 +32,7 @@ const CARS = [
       'Передний привод',
     ],
     buyingFocus:
-      'Проверить кузов, вариатор или АКПП в зависимости от версии, состояние подвески и историю обслуживания.',
+      'Проверить кузов, трансмиссию, состояние подвески и историю обслуживания.',
   },
 
   {
@@ -68,7 +68,7 @@ const CARS = [
       'Расход выше среднего',
     ],
     buyingFocus:
-      'Проверить кузов, автоматическую коробку, двигатель, систему охлаждения и историю обслуживания.',
+      'Проверить кузов, автоматическую коробку, двигатель, охлаждение и обслуживание.',
   },
 
   {
@@ -100,11 +100,11 @@ const CARS = [
       'Premium-интерьер',
     ],
     cons: [
-      'Состояние конкретного экземпляра очень важно',
+      'Очень важно состояние конкретного экземпляра',
       'Обслуживание дороже массовых моделей',
     ],
     buyingFocus:
-      'Проверить двигатель, цепь ГРМ на соответствующих моторах, коробку, течи и историю обслуживания.',
+      'Проверить двигатель, коробку, течи и историю обслуживания.',
   },
 
   {
@@ -284,7 +284,7 @@ const CARS = [
       'Передний привод',
     ],
     buyingFocus:
-      'Проверить кузов, историю обслуживания, состояние подвески и электронных систем.',
+      'Проверить кузов, историю обслуживания, подвеску и электронные системы.',
   },
 
   {
@@ -362,23 +362,18 @@ function matchesBudget(car, budget) {
   )
 }
 
-function scoreCar(car, answers, budget) {
-  let score = 0
+function calculateScore(car, answers, budget) {
+  if (!matchesBudget(car, budget)) {
+    return -1
+  }
+
+  let score = 35
 
   const priorities = answers.priority || []
   const bodies = answers.body || []
   const drives = answers.drive || []
   const brands = answers.brand || []
 
-  // Бюджет — обязательный фильтр.
-  if (!matchesBudget(car, budget)) {
-    return -1
-  }
-
-  // Бюджет.
-  score += 35
-
-  // Кузов.
   if (
     !bodies.length ||
     bodies.includes('Не имеет значения') ||
@@ -387,26 +382,21 @@ function scoreCar(car, answers, budget) {
     score += 15
   }
 
-  // Привод.
   if (
     !drives.length ||
     drives.includes('Не имеет значения')
   ) {
     score += 7
   } else if (
-    (drives.includes('Полный') &&
-      car.drive === 'AWD') ||
-    (drives.includes('Передний') &&
-      car.drive === 'FWD') ||
-    (drives.includes('Задний') &&
-      car.drive === 'RWD')
+    (drives.includes('Полный') && car.drive === 'AWD') ||
+    (drives.includes('Передний') && car.drive === 'FWD') ||
+    (drives.includes('Задний') && car.drive === 'RWD')
   ) {
     score += 10
   } else {
     score -= 8
   }
 
-  // Бренд.
   if (
     !brands.length ||
     brands.includes('Любая марка')
@@ -415,9 +405,7 @@ function scoreCar(car, answers, budget) {
   } else if (
     brands.includes(car.brand) ||
     (
-      brands.includes(
-        'Porsche / BMW / Mercedes',
-      ) &&
+      brands.includes('Porsche / BMW / Mercedes') &&
       ['Porsche', 'BMW', 'Mercedes-Benz'].includes(
         car.brand,
       )
@@ -426,7 +414,6 @@ function scoreCar(car, answers, budget) {
     score += 10
   }
 
-  // Приоритеты.
   const priorityMap = {
     Динамика: 'performance',
     Комфорт: 'comfort',
@@ -453,19 +440,10 @@ function scoreCar(car, answers, budget) {
       5
   }
 
-  // Динамика.
   const power = answers.power?.[0]
 
-  if (power === 'Спокойная') {
-    score += car.scores.performance >= 70 ? 2 : 8
-  }
-
-  if (power === 'Бодрая') {
-    score += car.scores.performance >= 65 ? 7 : 2
-  }
-
   if (power === 'Быстрая') {
-    score += car.scores.performance >= 80 ? 9 : 2
+    score += car.scores.performance >= 80 ? 8 : 2
   }
 
   if (power === 'Очень быстрая') {
@@ -473,32 +451,27 @@ function scoreCar(car, answers, budget) {
   }
 
   if (
-    power ===
-    'Мне нужна максимальная динамика'
+    power === 'Мне нужна максимальная динамика'
   ) {
     score += car.scores.performance >= 95 ? 10 : 0
   }
 
-  // Расход.
   const fuel = answers.fuel?.[0]
 
   if (
-    fuel ===
-    'Очень важен низкий расход'
+    fuel === 'Очень важен низкий расход'
   ) {
     score += car.scores.economy / 12
   }
 
   if (
-    fuel ===
-    'Желателен умеренный расход'
+    fuel === 'Желателен умеренный расход'
   ) {
     score += car.scores.economy / 18
   }
 
   if (
-    fuel ===
-    'Главное — динамика'
+    fuel === 'Главное — динамика'
   ) {
     score += car.scores.performance / 18
   }
@@ -510,10 +483,10 @@ function scoreCar(car, answers, budget) {
 }
 
 function buildReason(car, answers, score) {
-  const parts = []
+  const reasons = []
 
   if (answers.budget?.[0]) {
-    parts.push(
+    reasons.push(
       `входит в выбранный бюджет`,
     )
   }
@@ -522,32 +495,32 @@ function buildReason(car, answers, score) {
     answers.body?.includes(car.body) ||
     answers.body?.includes('Не имеет значения')
   ) {
-    parts.push(
+    reasons.push(
       `соответствует кузову`,
     )
   }
 
-  if (answers.drive?.length) {
-    parts.push(
-      `учитывает предпочтение по приводу`,
-    )
-  }
-
   if (answers.priority?.length) {
-    parts.push(
+    reasons.push(
       `соответствует ключевым приоритетам`,
     )
   }
 
+  if (answers.drive?.length) {
+    reasons.push(
+      `учитывает предпочтение по приводу`,
+    )
+  }
+
   if (score >= 85) {
-    return `Высокая совместимость: ${parts.join(', ')}.`
+    return `Высокая совместимость: ${reasons.join(', ')}.`
   }
 
   if (score >= 70) {
-    return `Хорошая совместимость: ${parts.join(', ')}.`
+    return `Хорошая совместимость: ${reasons.join(', ')}.`
   }
 
-  return `Умеренная совместимость: ${parts.join(', ')}.`
+  return `Умеренная совместимость: ${reasons.join(', ')}.`
 }
 
 export default function handler(req, res) {
@@ -573,7 +546,6 @@ export default function handler(req, res) {
       answers.budget?.[0],
     )
 
-    // Сначала ЖЁСТКО фильтруем по бюджету.
     const affordableCars = CARS.filter(
       (car) =>
         car.priceMin >= budget.min &&
@@ -585,20 +557,32 @@ export default function handler(req, res) {
         recommendations: [],
         noMatches: true,
         message:
-          'В текущей демонстрационной базе нет автомобилей, которые укладываются в выбранный бюджет. Попробуйте увеличить бюджет или изменить параметры.',
+          'В текущей демонстрационной базе нет автомобилей, которые укладываются в выбранный бюджет. Попробуйте изменить параметры.',
       })
     }
 
     const recommendations = affordableCars
       .map((car) => {
-        const score = scoreCar(
+        const score = calculateScore(
           car,
           answers,
           budget,
         )
 
         return {
-          ...car,
+          id: car.id,
+          brand: car.brand,
+          name: car.name,
+          price: car.price,
+          power: car.power,
+          drive: car.drive,
+          body: car.body,
+          image: car.image,
+          tags: car.tags,
+          scores: car.scores,
+          pros: car.pros,
+          cons: car.cons,
+          buying_focus: car.buyingFocus,
           type: car.body,
           score,
           match_score: score,
@@ -607,22 +591,18 @@ export default function handler(req, res) {
             answers,
             score,
           ),
-          buying_focus:
-            car.buyingFocus,
         }
       })
-      .filter(
-        (car) => car.score >= 0,
-      )
+      .filter((car) => car.score >= 0)
       .sort(
-        (a, b) =>
-          b.score - a.score,
+        (a, b) => b.score - a.score,
       )
       .slice(0, 3)
 
     return res.status(200).json({
       recommendations,
       noMatches: false,
+      message: '',
     })
   } catch (error) {
     console.error(
