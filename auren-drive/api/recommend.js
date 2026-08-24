@@ -15,24 +15,152 @@ const MARKET_DOMAINS = [
 const IMAGE_HEADERS = {
   'User-Agent':
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128 Safari/537.36',
+
   Accept:
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
 }
 
+const SYSTEM_PROMPT = `
+Ты — AUREN DRIVE, профессиональный AI-поисковик автомобилей.
+
+Твоя задача:
+- изучить требования пользователя;
+- исследовать актуальный рынок;
+- использовать веб-поиск;
+- выбрать 3 наиболее подходящих автомобиля;
+- анализировать цены, характеристики, надежность и обслуживание;
+- по возможности находить реальные объявления.
+
+КРИТИЧЕСКИ ВАЖНО:
+
+Не придумывай URL.
+Не придумывай объявления.
+Не придумывай цены.
+Не придумывай фото.
+Не создавай фиктивные ссылки.
+
+Система сама извлечет реальные URL из поисковых результатов Groq.
+
+Бюджет пользователя является важным ограничением.
+
+Если пользователь указал бюджет до 1 млн ₽,
+не предлагай автомобиль за 3 млн ₽ только потому,
+что он хороший.
+
+Учитывай:
+- бюджет;
+- возраст;
+- кузов;
+- привод;
+- динамику;
+- расход;
+- надежность;
+- комфорт;
+- обслуживание;
+- типичные проблемы;
+- ликвидность;
+- российский рынок.
+
+Ищи несколько источников.
+
+ОТВЕТ ДОЛЖЕН ИМЕТЬ ЭТОТ ФОРМАТ:
+
+CAR_1
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+
+CAR_2
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+
+CAR_3
+NAME: ...
+PRICE: ...
+SPECS: ...
+WHY: ...
+PROS: ...
+CONS: ...
+PROBLEMS: ...
+CHECK: ...
+
+BEST: ...
+BEST_REASON: ...
+
+Не добавляй никаких PHOTO_URL или LISTING_URL.
+`
+
+function buildPrompt(answers) {
+  return `
+ПРОФИЛЬ ПОКУПАТЕЛЯ:
+
+${JSON.stringify(
+  answers,
+  null,
+  2,
+)}
+
+Проведи актуальное веб-исследование российского рынка автомобилей.
+
+Приоритет:
+1. Auto.ru
+2. Drom.ru
+3. Avito.ru
+4. другие надежные автомобильные источники.
+
+Найди подходящие модели.
+
+Если доступны реальные объявления — используй их как источник информации.
+
+Для каждого автомобиля проверь:
+- цену;
+- год;
+- двигатель;
+- мощность;
+- привод;
+- расход;
+- надежность;
+- типичные неисправности;
+- обслуживание;
+- ликвидность.
+
+Выбери только те автомобили, которые действительно подходят пользователю.
+`
+}
+
 function cleanUrl(value) {
   if (
-    typeof value !== 'string' ||
-    !/^https?:\/\//i.test(value)
+    typeof value !== 'string'
   ) {
     return ''
   }
 
-  return value.trim()
+  const url = value.trim()
+
+  if (
+    !/^https?:\/\//i.test(url)
+  ) {
+    return ''
+  }
+
+  return url
 }
 
-function hostOf(url) {
+function getHost(url) {
   try {
-    return new URL(url).hostname
+    return new URL(url)
+      .hostname
       .replace(/^www\./, '')
       .toLowerCase()
   } catch {
@@ -40,8 +168,8 @@ function hostOf(url) {
   }
 }
 
-function isMarketListing(url) {
-  const host = hostOf(url)
+function isMarketDomain(url) {
+  const host = getHost(url)
 
   return MARKET_DOMAINS.some(
     (domain) =>
@@ -60,56 +188,132 @@ function normalize(text = '') {
     .trim()
 }
 
-function modelTokens(name = '') {
+function getNameTokens(name = '') {
   return normalize(name)
     .split(/\s+/)
     .filter(
       (token) =>
-        token.length >= 2 &&
-        ![
-          'toyota',
-          'bmw',
-          'mercedes',
-          'benz',
-          'audi',
-          'porsche',
-          'haval',
-          'chery',
-          'lada',
-          'hyundai',
-          'kia',
-          'lexus',
-        ].includes(token),
+        token.length >= 2,
     )
 }
 
-function resultMatchesCar(result, carName) {
-  const haystack = normalize(
-    `${result?.title || ''} ${result?.content || ''}`,
+function resultMatchesCar(
+  result,
+  carName,
+) {
+  const text = normalize(
+    `${result.title || ''} ${
+      result.content || ''
+    }`,
   )
 
   const tokens =
-    modelTokens(carName)
+    getNameTokens(carName)
 
   if (!tokens.length) {
     return false
   }
 
-  const matches =
+  const matched =
     tokens.filter((token) =>
-      haystack.includes(token),
+      text.includes(token),
     )
 
   return (
-    matches.length >=
+    matched.length >=
     Math.max(
       1,
-      Math.ceil(tokens.length * 0.5),
+      Math.ceil(
+        tokens.length * 0.5,
+      ),
     )
   )
 }
 
-function chooseBestSource(
+/*
+  ВАЖНО:
+  Groq возвращает:
+  
+  search_results: {
+    results: [...]
+  }
+
+  а не:
+  
+  search_results: [...]
+*/
+function extractSearchResults(
+  executedTools,
+) {
+  const results = []
+
+  if (
+    !Array.isArray(
+      executedTools,
+    )
+  ) {
+    return results
+  }
+
+  for (const tool of executedTools) {
+    const searchResults =
+      tool?.search_results
+
+    let items = []
+
+    if (
+      Array.isArray(
+        searchResults,
+      )
+    ) {
+      items =
+        searchResults
+    } else if (
+      Array.isArray(
+        searchResults?.results,
+      )
+    ) {
+      items =
+        searchResults.results
+    }
+
+    for (const item of items) {
+      const url = cleanUrl(
+        item?.url,
+      )
+
+      if (!url) {
+        continue
+      }
+
+      if (
+        results.some(
+          (existing) =>
+            existing.url ===
+            url,
+        )
+      ) {
+        continue
+      }
+
+      results.push({
+        title:
+          item?.title || '',
+        url,
+        content:
+          item?.content || '',
+        score:
+          Number(
+            item?.score,
+          ) || 0,
+      })
+    }
+  }
+
+  return results
+}
+
+function pickBestSource(
   results,
   carName,
 ) {
@@ -118,23 +322,22 @@ function chooseBestSource(
       resultMatchesCar(
         result,
         carName,
-      ) &&
-      cleanUrl(result?.url),
+      ),
   )
 
   if (!matches.length) {
     return null
   }
 
-  const sorted = [...matches].sort(
+  return [...matches].sort(
     (a, b) => {
       const aMarket =
-        isMarketListing(a.url)
+        isMarketDomain(a.url)
           ? 1
           : 0
 
       const bMarket =
-        isMarketListing(b.url)
+        isMarketDomain(b.url)
           ? 1
           : 0
 
@@ -149,60 +352,49 @@ function chooseBestSource(
       }
 
       return (
-        (b.score || 0) -
-        (a.score || 0)
+        b.score -
+        a.score
       )
     },
-  )
-
-  return sorted[0]
+  )[0]
 }
 
-function extractSearchResults(
-  executedTools,
+function pickListing(
+  results,
+  carName,
 ) {
-  const all = []
+  const matches =
+    results.filter(
+      (result) =>
+        isMarketDomain(
+          result.url,
+        ) &&
+        resultMatchesCar(
+          result,
+          carName,
+        ),
+    )
 
-  for (const tool of executedTools || []) {
-    for (const result of
-      tool?.search_results || []) {
-      const url = cleanUrl(
-        result?.url,
-      )
-
-      if (!url) continue
-
-      if (
-        all.some(
-          (item) =>
-            item.url === url,
-        )
-      ) {
-        continue
-      }
-
-      all.push({
-        title:
-          result?.title || '',
-        url,
-        content:
-          result?.content || '',
-        score:
-          Number(result?.score) ||
-          0,
-      })
-    }
+  if (!matches.length) {
+    return null
   }
 
-  return all
+  return [...matches].sort(
+    (a, b) =>
+      b.score -
+      a.score,
+  )[0]
 }
 
 async function extractOgImage(
   pageUrl,
 ) {
-  const url = cleanUrl(pageUrl)
+  const url =
+    cleanUrl(pageUrl)
 
-  if (!url) return ''
+  if (!url) {
+    return ''
+  }
 
   try {
     const response =
@@ -235,8 +427,15 @@ async function extractOgImage(
 
     const patterns = [
       /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+
       /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+
+      /<meta[^>]+property=["']og:image:url["'][^>]+content=["']([^"']+)["']/i,
+
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image:url["']/i,
+
       /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+
       /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i,
     ]
 
@@ -244,7 +443,9 @@ async function extractOgImage(
       const match =
         html.match(pattern)
 
-      if (!match?.[1]) {
+      if (
+        !match?.[1]
+      ) {
         continue
       }
 
@@ -264,147 +465,116 @@ async function extractOgImage(
   }
 }
 
-function parseCars(text = '') {
-  const blocks = text.split(
-    /CAR_(?:1|2|3)\s*/i,
-  )
-
-  const result = []
+function parseCars(
+  text = '',
+) {
+  const cars = []
 
   for (
-    let index = 1;
-    index < blocks.length &&
-    index <= 3;
-    index++
+    let number = 1;
+    number <= 3;
+    number++
   ) {
-    const block =
-      blocks[index]
-
-    const getField = (
-      name,
-    ) => {
-      const regex =
+    const start =
+      text.search(
         new RegExp(
-          `^${name}:\\s*(.*)$`,
-          'im',
+          `CAR_${number}\\s*`,
+          'i',
+        ),
+      )
+
+    if (start === -1) {
+      continue
+    }
+
+    const nextMarker =
+      number < 3
+        ? text.search(
+            new RegExp(
+              `CAR_${number + 1}\\s*`,
+              'i',
+            ),
+          )
+        : text.search(
+            /BEST:/i,
+          )
+
+    const end =
+      nextMarker !== -1
+        ? nextMarker
+        : text.length
+
+    const block =
+      text.slice(
+        start,
+        end,
+      )
+
+    function field(
+      name,
+    ) {
+      const match =
+        block.match(
+          new RegExp(
+            `^${name}:\\s*(.*)$`,
+            'im',
+          ),
         )
 
       return (
-        block.match(regex)?.[1]?.trim() ||
+        match?.[1]?.trim() ||
         ''
       )
     }
 
     const name =
-      getField('NAME')
+      field('NAME')
 
     if (!name) {
       continue
     }
 
-    result.push({
-      id: `${index}-${name}`,
-      position: index,
+    cars.push({
+      id: `${number}-${name}`,
+      position: number,
       name,
       price:
-        getField('PRICE'),
+        field('PRICE'),
       specs:
-        getField('SPECS'),
+        field('SPECS'),
       why:
-        getField('WHY'),
+        field('WHY'),
       pros:
-        getField('PROS'),
+        field('PROS'),
       cons:
-        getField('CONS'),
+        field('CONS'),
       problems:
-        getField('PROBLEMS'),
+        field('PROBLEMS'),
       check:
-        getField('CHECK'),
+        field('CHECK'),
     })
   }
 
-  return result
+  return cars
 }
 
-const SYSTEM_PROMPT = `
-Ты — AUREN DRIVE, профессиональный AI-поисковик автомобилей.
-
-Проведи актуальное исследование российского автомобильного рынка.
-
-Используй browser_search.
-
-НАЙДИ:
-- подходящие модели;
-- реальные актуальные цены;
-- конкретные объявления, если доступны;
-- несколько источников;
-- типичные проблемы;
-- характеристики;
-- плюсы и минусы.
-
-ОЧЕНЬ ВАЖНО:
-
-НЕ ПРИДУМЫВАЙ URL.
-
-НЕ ПИШИ PHOTO_URL.
-
-НЕ ПИШИ LISTING_URL.
-
-Система сама получит реальные URL из результатов поиска.
-
-Если конкретных объявлений недостаточно — просто выбери подходящие модели, но не выдумывай ссылки.
-
-ФОРМАТ:
-
-CAR_1
-NAME: название
-PRICE: цена или диапазон
-SPECS: характеристики
-WHY: почему подходит
-PROS: плюсы
-CONS: минусы
-PROBLEMS: типичные проблемы
-CHECK: что проверить перед покупкой
-
-CAR_2
-...
-
-CAR_3
-...
-
-BEST: лучший вариант
-BEST_REASON: почему
-
-Не придумывай данные.
-Бюджет пользователя является важным ограничением.
-`
-
-function buildPrompt(
-  answers,
+function parseBest(
+  text = '',
 ) {
-  return `
-ПРОФИЛЬ ПОКУПАТЕЛЯ:
+  const best =
+    text.match(
+      /^BEST:\s*(.*)$/im,
+    )?.[1] || ''
 
-${JSON.stringify(
-  answers,
-  null,
-  2,
-)}
+  const reason =
+    text.match(
+      /^BEST_REASON:\s*([\s\S]*)$/im,
+    )?.[1] || ''
 
-Найди TOP-3.
-
-Особенно ищи российские источники и реальные предложения.
-
-Приоритет источников:
-1. Auto.ru
-2. Drom.ru
-3. Avito.ru
-4. другие актуальные автомобильные источники.
-
-Для каждой машины найди наиболее релевантный источник.
-
-Не выдумывай ссылки.
-`
+  return {
+    best: best.trim(),
+    reason: reason.trim(),
+  }
 }
 
 export default async function handler(
@@ -419,7 +589,9 @@ export default async function handler(
   }
 
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (
+      !process.env.GROQ_API_KEY
+    ) {
       return res.status(500).json({
         error:
           'GROQ_API_KEY is missing in Vercel',
@@ -499,76 +671,86 @@ export default async function handler(
       })
     }
 
-    const cars =
-      parseCars(answer)
-
     const executedTools =
-      message
-        ?.executed_tools ||
-      []
+      Array.isArray(
+        message?.executed_tools,
+      )
+        ? message.executed_tools
+        : []
 
     const searchResults =
       extractSearchResults(
         executedTools,
       )
 
+    console.log(
+      'AUREN SEARCH RESULTS:',
+      searchResults.length,
+    )
+
+    const cars =
+      parseCars(answer)
+
     const enrichedCars =
       await Promise.all(
         cars.map(
           async (car) => {
             const source =
-              chooseBestSource(
+              pickBestSource(
                 searchResults,
                 car.name,
               )
 
-            const listingCandidates =
-              searchResults
-                .filter(
-                  (item) =>
-                    resultMatchesCar(
-                      item,
-                      car.name,
-                    ) &&
-                    isMarketListing(
-                      item.url,
-                    ),
-                )
-                .sort(
-                  (a, b) =>
-                    (b.score || 0) -
-                    (a.score || 0),
-                )
-
             const listing =
-              listingCandidates[0] ||
-              null
-
-            const sourceForImage =
-              listing ||
-              source
-
-            const photoUrl =
-              await extractOgImage(
-                sourceForImage?.url,
+              pickListing(
+                searchResults,
+                car.name,
               )
+
+            /*
+              Для фото сначала
+              пробуем реальное
+              объявление.
+              Если не получилось —
+              используем основной
+              источник.
+            */
+            let photoUrl =
+              ''
+
+            if (
+              listing?.url
+            ) {
+              photoUrl =
+                await extractOgImage(
+                  listing.url,
+                )
+            }
+
+            if (
+              !photoUrl &&
+              source?.url
+            ) {
+              photoUrl =
+                await extractOgImage(
+                  source.url,
+                )
+            }
 
             return {
               ...car,
 
               sourceUrl:
-                cleanUrl(
-                  source?.url,
-                ),
+                source?.url ||
+                '',
 
               sourceTitle:
                 source?.title ||
                 '',
 
               listingUrl:
-                cleanUrl(
-                  listing?.url,
-                ),
+                listing?.url ||
+                '',
 
               listingTitle:
                 listing?.title ||
@@ -590,15 +772,8 @@ export default async function handler(
         ),
       )
 
-    const bestMatch =
-      answer.match(
-        /BEST:\s*(.*)/i,
-      )
-
-    const bestReasonMatch =
-      answer.match(
-        /BEST_REASON:\s*([\s\S]*?)$/i,
-      )
+    const best =
+      parseBest(answer)
 
     return res.status(200).json({
       cars:
@@ -608,16 +783,14 @@ export default async function handler(
         ),
 
       best:
-        bestMatch?.[1]?.trim() ||
-        '',
+        best.best,
 
       bestReason:
-        bestReasonMatch?.[1]?.trim() ||
-        '',
+        best.reason,
 
       searched: true,
 
-      sourceCount:
+      searchResultsCount:
         searchResults.length,
     })
   } catch (error) {
