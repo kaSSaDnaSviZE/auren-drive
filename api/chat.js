@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import process from 'node:process'
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -54,13 +55,16 @@ Your areas of expertise:
 Answer naturally like a professional AI assistant.
 
 Rules:
-- Never invent specifications.
+- Answer in the same language as the user.
+- Never invent technical specifications.
 - Be honest when information is uncertain.
 - Do not claim to physically inspect a vehicle.
 - For repairs, tuning and safety, distinguish general information from professional inspection.
 - For current prices, availability, recalls, laws, or other time-sensitive information, say that current information should be verified.
 - Remember the conversation context.
-- Answer in the same language as the user.
+- Give concise answers by default, but provide detailed explanations when useful.
+- When comparing cars, explain the important differences instead of simply naming a winner.
+- When diagnosing a problem, ask for useful details when necessary.
         `,
       },
       ...cleanMessages.map((message) => ({
