@@ -21,6 +21,7 @@ const questions = [
       '10+ млн ₽',
     ],
   },
+
   {
     id: 'condition',
     number: '02',
@@ -35,6 +36,7 @@ const questions = [
       'Возраст не важен',
     ],
   },
+
   {
     id: 'body',
     number: '03',
@@ -52,6 +54,7 @@ const questions = [
       'Не имеет значения',
     ],
   },
+
   {
     id: 'priority',
     number: '04',
@@ -70,6 +73,7 @@ const questions = [
       'Технологичность',
     ],
   },
+
   {
     id: 'power',
     number: '05',
@@ -84,6 +88,7 @@ const questions = [
       'Максимальная динамика',
     ],
   },
+
   {
     id: 'drive',
     number: '06',
@@ -98,6 +103,7 @@ const questions = [
       'Не имеет значения',
     ],
   },
+
   {
     id: 'fuel',
     number: '07',
@@ -111,6 +117,7 @@ const questions = [
       'Главное — динамика',
     ],
   },
+
   {
     id: 'brand',
     number: '08',
@@ -131,17 +138,6 @@ const questions = [
   },
 ]
 
-function safeImage(car) {
-  if (
-    car?.image &&
-    /^https?:\/\//i.test(car.image)
-  ) {
-    return car.image
-  }
-
-  return ''
-}
-
 function App() {
   const [screen, setScreen] =
     useState('home')
@@ -151,6 +147,9 @@ function App() {
 
   const [answers, setAnswers] =
     useState({})
+
+  const [freeText, setFreeText] =
+    useState('')
 
   const [cars, setCars] =
     useState([])
@@ -192,7 +191,7 @@ function App() {
       }
     })
 
-  const [queryHistory, setQueryHistory] =
+  const [history, setHistory] =
     useState(() => {
       try {
         return JSON.parse(
@@ -214,16 +213,20 @@ function App() {
   useEffect(() => {
     localStorage.setItem(
       'auren_saved_cars',
-      JSON.stringify(savedCars),
+      JSON.stringify(
+        savedCars,
+      ),
     )
   }, [savedCars])
 
   useEffect(() => {
     localStorage.setItem(
       'auren_history',
-      JSON.stringify(queryHistory),
+      JSON.stringify(
+        history,
+      ),
     )
-  }, [queryHistory])
+  }, [history])
 
   const savedIds = useMemo(
     () =>
@@ -234,6 +237,28 @@ function App() {
       ),
     [savedCars],
   )
+
+  function begin() {
+    setScreen('quiz')
+    setStep(0)
+    setError('')
+  }
+
+  function reset() {
+    setScreen('home')
+    setStep(0)
+    setAnswers({})
+    setFreeText('')
+    setCars([])
+    setBest('')
+    setBestReason('')
+    setMarketNote('')
+    setImportant('')
+    setSources([])
+    setModelUsed('')
+    setLoading(false)
+    setError('')
+  }
 
   function toggleOption(option) {
     setError('')
@@ -274,7 +299,34 @@ function App() {
         }
       }
 
-      if (current.includes(option)) {
+      if (
+        question.id === 'body' &&
+        option === 'Не имеет значения'
+      ) {
+        return {
+          ...prev,
+          [question.id]:
+            current.includes(option)
+              ? []
+              : ['Не имеет значения'],
+        }
+      }
+
+      if (
+        question.id === 'body' &&
+        current.includes(
+          'Не имеет значения',
+        )
+      ) {
+        return {
+          ...prev,
+          [question.id]: [option],
+        }
+      }
+
+      if (
+        current.includes(option)
+      ) {
         return {
           ...prev,
           [question.id]:
@@ -295,12 +347,26 @@ function App() {
     })
   }
 
+  function back() {
+    if (loading) return
+
+    if (step > 0) {
+      setStep(
+        (value) =>
+          value - 1,
+      )
+    } else {
+      setScreen('home')
+    }
+  }
+
   function toggleSaved(car) {
     setSavedCars((prev) => {
-      const exists = prev.some(
-        (item) =>
-          item.id === car.id,
-      )
+      const exists =
+        prev.some(
+          (item) =>
+            item.id === car.id,
+        )
 
       if (exists) {
         return prev.filter(
@@ -309,76 +375,40 @@ function App() {
         )
       }
 
-      return [...prev, car]
+      return [
+        ...prev,
+        car,
+      ]
     })
   }
 
-  function reset() {
-    setScreen('home')
-    setStep(0)
-    setAnswers({})
-    setCars([])
-    setBest('')
-    setBestReason('')
-    setMarketNote('')
-    setImportant('')
-    setSources([])
-    setModelUsed('')
-    setLoading(false)
-    setError('')
-  }
+  async function runResearch(
+    extraProfile = {},
+  ) {
+    if (loading) return
 
-  function begin() {
-    setScreen('quiz')
-    setStep(0)
-    setError('')
-  }
-
-  function back() {
-    if (loading) {
-      return
-    }
-
-    if (step > 0) {
-      setStep(
-        (value) =>
-          value - 1,
-      )
-      return
-    }
-
-    setScreen('home')
-  }
-
-  async function runResearch() {
-    if (
-      !selected.length ||
-      loading
-    ) {
-      return
-    }
-
-    const finalAnswers = {
-      ...answers,
-      [question.id]:
-        selected,
-    }
-
-    setAnswers(finalAnswers)
     setLoading(true)
     setError('')
-
-    const controller =
-      new AbortController()
-
-    const timeout =
-      setTimeout(
-        () =>
-          controller.abort(),
-        60000,
-      )
+    setCars([])
 
     try {
+      const profile = {
+        ...answers,
+        freeText:
+          freeText.trim(),
+        ...extraProfile,
+      }
+
+      const controller =
+        new AbortController()
+
+      const timeout =
+        setTimeout(
+          () =>
+            controller.abort(),
+          60000,
+        )
+
       const response =
         await fetch(
           '/api/recommend',
@@ -389,13 +419,14 @@ function App() {
                 'application/json',
             },
             body: JSON.stringify({
-              answers:
-                finalAnswers,
+              profile,
             }),
             signal:
               controller.signal,
           },
         )
+
+      clearTimeout(timeout)
 
       const raw =
         await response.text()
@@ -422,10 +453,15 @@ function App() {
         )
       }
 
-      setCars(
-        Array.isArray(data.cars)
+      const resultCars =
+        Array.isArray(
+          data.cars,
+        )
           ? data.cars
-          : [],
+          : []
+
+      setCars(
+        resultCars,
       )
 
       setBest(
@@ -433,15 +469,18 @@ function App() {
       )
 
       setBestReason(
-        data.bestReason || '',
+        data.bestReason ||
+          '',
       )
 
       setMarketNote(
-        data.marketNote || '',
+        data.marketNote ||
+          '',
       )
 
       setImportant(
-        data.important || '',
+        data.important ||
+          '',
       )
 
       setSources(
@@ -453,29 +492,26 @@ function App() {
       )
 
       setModelUsed(
-        data.model || '',
+        data.model ||
+          '',
       )
 
-      setQueryHistory(
+      setHistory(
         (prev) => [
           {
-            id: Date.now(),
-            answers:
-              finalAnswers,
-            count:
-              Array.isArray(
-                data.cars,
-              )
-                ? data.cars.length
-                : 0,
-            createdAt:
-              new Date().toISOString(),
+            id:
+              Date.now(),
+            profile,
+            resultCount:
+              resultCars.length,
           },
           ...prev,
-        ].slice(0, 12),
+        ].slice(0, 15),
       )
 
-      setScreen('results')
+      setScreen(
+        'results',
+      )
 
       window.scrollTo(
         0,
@@ -496,7 +532,6 @@ function App() {
         )
       }
     } finally {
-      clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -528,9 +563,9 @@ function App() {
     )
   }
 
-  function shareResult() {
+  function share() {
     const text =
-      `AUREN DRIVE — мой подбор: ${
+      `AUREN DRIVE: ${
         cars
           .map(
             (car) =>
@@ -549,13 +584,11 @@ function App() {
         url:
           window.location.href,
       })
-
-      return
+    } else {
+      navigator.clipboard?.writeText(
+        `${text}\n${window.location.href}`,
+      )
     }
-
-    navigator.clipboard?.writeText(
-      `${text}\n${window.location.href}`,
-    )
   }
 
   if (
@@ -563,196 +596,178 @@ function App() {
     'home'
   ) {
     return (
-      <div className="app-shell">
+      <div className="app">
         <header className="nav">
-          <div className="brand">
-            <span>
-              AUREN
-            </span>{' '}
+          <button
+            className="brand"
+            onClick={reset}
+          >
+            <span>AUREN</span>{' '}
             DRIVE
-          </div>
+          </button>
 
-          <div className="nav-pill">
-            AI CAR RESEARCH
+          <div className="nav-center">
+            LIVE AI CAR RESEARCH
           </div>
 
           <button
-            className="nav-link"
+            className="nav-button"
             onClick={() =>
               savedCars.length
                 ? setScreen(
-                    'saved',
+                    'garage',
                   )
                 : begin()
             }
           >
-            {savedCars.length >
-            0
-              ? `Избранное ${savedCars.length}`
+            {savedCars.length
+              ? `Garage · ${savedCars.length}`
               : 'Начать'}
           </button>
         </header>
 
-        <main className="hero">
-          <section className="hero-main">
+        <main className="home">
+          <section className="home-copy">
             <div className="eyebrow">
               AUREN DRIVE · LIVE
               MARKET
             </div>
 
             <h1>
-              Машина должна
+              Найдём
               <br />
-              подходить
+              машину
               <br />
               <em>
-                вам.
+                именно
+                <br />
+                под тебя.
               </em>
             </h1>
 
-            <p className="hero-text">
-              Не бесконечный список
-              объявлений.
-              <br />
-              AUREN изучает ваши
-              предпочтения,
-              <br />
-              исследует рынок и
+            <p>
+              AUREN анализирует
+              твои требования,
+              ищет актуальную
+              информацию в
+              интернете и
               объясняет,
-              <br />
               что действительно
-              стоит смотреть.
+              стоит покупать.
             </p>
 
             <div className="hero-actions">
               <button
-                className="primary-btn"
+                className="primary-button"
                 onClick={begin}
               >
                 Подобрать автомобиль
-                <span>
-                  →
-                </span>
+                <span>→</span>
               </button>
 
               {savedCars.length >
                 0 && (
                 <button
-                  className="ghost-btn"
+                  className="secondary-button"
                   onClick={() =>
                     setScreen(
-                      'saved',
+                      'garage',
                     )
                   }
                 >
-                  Избранное
-                  <span>
-                    {savedCars.length}
-                  </span>
+                  Garage
                 </button>
               )}
             </div>
 
-            <div className="trust-row">
+            <div className="trust">
               <span>
                 ● LIVE WEB SEARCH
               </span>
 
               <span>
-                ● НЕ СТАТИЧНАЯ БАЗА
+                ● REAL SOURCES
               </span>
 
               <span>
-                ● TOP-3 MATCH
+                ● PERSONAL MATCH
               </span>
             </div>
           </section>
 
-          <section className="hero-art">
-            <div className="art-grid" />
+          <section className="home-visual">
+            <div className="grid-bg" />
 
-            <div className="art-ring">
-              <div>
-                <small>
-                  AUREN
-                </small>
+            <div className="core">
+              <small>
+                AUREN
+              </small>
 
-                <strong>
-                  DRIVE
-                </strong>
-              </div>
+              <strong>
+                DRIVE
+              </strong>
+
+              <span>
+                AI CAR FINDER
+              </span>
             </div>
 
-            <div className="art-card card-top">
+            <div className="float-card top-card">
               <span>
                 MATCH
               </span>
 
               <strong>
-                97%
+                97
               </strong>
             </div>
 
-            <div className="art-card card-bottom">
+            <div className="float-card bottom-card">
               <span>
-                WEB SEARCH
+                LIVE SEARCH
               </span>
 
               <strong>
-                LIVE
+                ON
               </strong>
             </div>
           </section>
         </main>
 
-        <section className="feature-strip">
+        <section className="feature-row">
           <div>
-            <span>
-              01
-            </span>
-
+            <span>01</span>
             <strong>
+              Найти
+            </strong>
+            <p>
               Персональный подбор
-            </strong>
-
-            <p>
-              Система учитывает не
-              только бюджет, но и
-              характер будущего
-              владельца.
+              вместо бесконечной
+              ленты объявлений.
             </p>
           </div>
 
           <div>
-            <span>
-              02
-            </span>
-
+            <span>02</span>
             <strong>
-              Реальный рынок
+              Проверить
             </strong>
-
             <p>
-              AUREN использует
-              актуальный веб-поиск,
-              а не фиксированный
-              каталог.
+              Плюсы, минусы,
+              проблемы и риски
+              каждой модели.
             </p>
           </div>
 
           <div>
-            <span>
-              03
-            </span>
-
+            <span>03</span>
             <strong>
-              Объяснение решения
+              Решить
             </strong>
-
             <p>
-              Ты получаешь не только
-              модель, но и аргументы:
-              плюсы, минусы и риски.
+              AUREN объясняет,
+              почему один вариант
+              лучше другого.
             </p>
           </div>
         </section>
@@ -762,30 +777,28 @@ function App() {
 
   if (
     screen ===
-    'saved'
+    'garage'
   ) {
     return (
-      <div className="app-shell">
+      <div className="app">
         <header className="nav">
           <button
-            className="brand brand-button"
+            className="brand"
             onClick={reset}
           >
-            <span>
-              AUREN
-            </span>{' '}
+            <span>AUREN</span>{' '}
             DRIVE
           </button>
 
           <button
-            className="nav-link"
+            className="nav-button"
             onClick={begin}
           >
             Новый подбор
           </button>
         </header>
 
-        <main className="saved-page">
+        <main className="garage">
           <div className="eyebrow">
             YOUR GARAGE
           </div>
@@ -798,55 +811,56 @@ function App() {
 
           {savedCars.length ===
           0 ? (
-            <div className="empty-state">
+            <div className="empty">
               <strong>
-                Здесь пока пусто.
+                Garage пуст.
               </strong>
 
               <p>
-                Добавляй автомобили
-                в избранное из
+                Сохраняй понравившиеся
+                автомобили из
                 результатов поиска.
               </p>
 
               <button
-                className="primary-btn"
+                className="primary-button"
                 onClick={begin}
               >
                 Начать подбор →
               </button>
             </div>
           ) : (
-            <div className="saved-grid">
+            <div className="garage-grid">
               {savedCars.map(
                 (car) => (
                   <article
-                    className="saved-card"
+                    className="garage-card"
                     key={
                       car.id
                     }
                   >
-                    {safeImage(
-                      car,
-                    ) ? (
-                      <img
-                        src={
-                          car.image
-                        }
-                        alt={
-                          car.name
-                        }
-                      />
-                    ) : (
-                      <div className="saved-placeholder">
-                        AUREN DRIVE
-                      </div>
-                    )}
+                    <div className="garage-photo">
+                      {car.image ? (
+                        <img
+                          src={
+                            car.image
+                          }
+                          alt={
+                            car.name
+                          }
+                        />
+                      ) : (
+                        <span>
+                          AUREN
+                          DRIVE
+                        </span>
+                      )}
+                    </div>
 
-                    <div>
-                      <span>
-                        TOP MATCH
-                      </span>
+                    <div className="garage-content">
+                      <small>
+                        SAVED
+                      </small>
 
                       <h2>
                         {
@@ -860,18 +874,18 @@ function App() {
                           'Цена не указана'
                         }
                       </strong>
-                    </div>
 
-                    <button
-                      className="remove-btn"
-                      onClick={() =>
-                        toggleSaved(
-                          car,
-                        )
-                      }
-                    >
-                      Убрать
-                    </button>
+                      <button
+                        className="remove-button"
+                        onClick={() =>
+                          toggleSaved(
+                            car,
+                          )
+                        }
+                      >
+                        Удалить
+                      </button>
+                    </div>
                   </article>
                 ),
               )}
@@ -887,19 +901,17 @@ function App() {
     'quiz'
   ) {
     return (
-      <div className="app-shell">
+      <div className="app">
         <header className="nav">
           <button
-            className="brand brand-button"
+            className="brand"
             onClick={reset}
           >
-            <span>
-              AUREN
-            </span>{' '}
+            <span>AUREN</span>{' '}
             DRIVE
           </button>
 
-          <div className="progress-wrap">
+          <div className="progress">
             <span>
               {question.number}
               {' '}
@@ -911,7 +923,7 @@ function App() {
                 style={{
                   width: `${
                     ((step + 1) /
-                      questions.length) *
+                      8) *
                     100
                   }%`,
                 }}
@@ -921,7 +933,7 @@ function App() {
         </header>
 
         <main className="quiz">
-          <section>
+          <section className="quiz-main">
             <div className="eyebrow">
               {question.number}
               {' '}
@@ -934,7 +946,7 @@ function App() {
               }
             </h1>
 
-            <p>
+            <p className="quiz-description">
               {
                 question.description
               }
@@ -995,7 +1007,7 @@ function App() {
             </div>
 
             {error && (
-              <div className="error-card">
+              <div className="error">
                 <strong>
                   AUREN ERROR
                 </strong>
@@ -1009,8 +1021,8 @@ function App() {
             )}
 
             {loading && (
-              <div className="loading-card">
-                <div className="loader" />
+              <div className="loading">
+                <div className="spinner" />
 
                 <div>
                   <strong>
@@ -1018,11 +1030,10 @@ function App() {
                   </strong>
 
                   <span>
-                    AUREN ищет
-                    актуальные данные,
-                    сравнивает варианты
-                    и проверяет
-                    источники…
+                    Ищем автомобили,
+                    проверяем данные
+                    и сравниваем
+                    варианты…
                   </span>
                 </div>
               </div>
@@ -1030,7 +1041,7 @@ function App() {
 
             <div className="quiz-actions">
               <button
-                className="ghost-btn"
+                className="secondary-button"
                 onClick={back}
                 disabled={
                   loading
@@ -1040,7 +1051,7 @@ function App() {
               </button>
 
               <button
-                className="primary-btn"
+                className="primary-button"
                 onClick={next}
                 disabled={
                   loading ||
@@ -1049,7 +1060,8 @@ function App() {
               >
                 {loading
                   ? 'Исследуем…'
-                  : step === 7
+                  : step ===
+                      7
                     ? 'Найти автомобиль'
                     : 'Продолжить'}
 
@@ -1061,11 +1073,11 @@ function App() {
           </section>
 
           <aside className="quiz-aside">
-            <div className="giant-step">
+            <strong>
               {
                 question.number
               }
-            </div>
+            </strong>
 
             <div>
               <div className="eyebrow">
@@ -1073,9 +1085,10 @@ function App() {
               </div>
 
               <p>
-                Чем точнее ответы,
-                тем полезнее итоговый
-                подбор.
+                Ответы помогут
+                AUREN точнее
+                понять твой сценарий
+                покупки.
               </p>
             </div>
           </aside>
@@ -1085,30 +1098,26 @@ function App() {
   }
 
   return (
-    <div className="app-shell results-app">
+    <div className="app results-app">
       <header className="nav">
         <button
-          className="brand brand-button"
+          className="brand"
           onClick={reset}
         >
-          <span>
-            AUREN
-          </span>{' '}
+          <span>AUREN</span>{' '}
           DRIVE
         </button>
 
-        <div className="result-actions">
+        <div className="results-nav">
           <button
-            className="ghost-btn compact"
-            onClick={
-              shareResult
-            }
+            className="secondary-button"
+            onClick={share}
           >
             Поделиться
           </button>
 
           <button
-            className="nav-link"
+            className="nav-button"
             onClick={reset}
           >
             Новый подбор
@@ -1116,32 +1125,32 @@ function App() {
         </div>
       </header>
 
-      <main className="results-page">
+      <main className="results">
         <section className="results-head">
           <div>
             <div className="eyebrow">
-              AUREN DRIVE · RESULT
+              AUREN DRIVE · TOP
+              MATCHES
             </div>
 
             <h1>
-              Нашли.
+              Вот что
               <br />
-              Теперь
+              стоит
+              <br />
               <em>
-                {' '}
-                сравниваем.
+                посмотреть.
               </em>
             </h1>
 
             <p>
-              Вот три варианта,
-              которые AUREN считает
-              наиболее подходящими
-              под твой запрос.
+              AUREN изучил твой
+              профиль и актуальную
+              информацию рынка.
             </p>
           </div>
 
-          <div className="request-card">
+          <div className="brief">
             <span>
               YOUR BRIEF
             </span>
@@ -1165,20 +1174,24 @@ function App() {
                 'Любые приоритеты'}
             </small>
 
-            {modelUsed && (
+            {freeText && (
               <small>
-                AI: {modelUsed}
+                «
+                {
+                  freeText
+                }
+                »
               </small>
             )}
           </div>
         </section>
 
         {best && (
-          <section className="best-card">
+          <section className="best">
             <div>
-              <span className="eyebrow">
+              <div className="eyebrow">
                 AUREN CHOICE
-              </span>
+              </div>
 
               <h2>
                 {best}
@@ -1195,290 +1208,322 @@ function App() {
           </section>
         )}
 
-        <section className="car-grid">
-          {cars.map(
-            (
-              car,
-              index,
-            ) => {
-              const saved =
-                savedIds.has(
-                  car.id,
-                )
+        {cars.length === 0 ? (
+          <section className="no-results">
+            <strong>
+              Не удалось получить
+              полноценный TOP-3.
+            </strong>
 
-              const img =
-                safeImage(
+            <p>
+              Попробуй повторить
+              исследование с
+              немного более широкими
+              параметрами.
+            </p>
+
+            <button
+              className="primary-button"
+              onClick={reset}
+            >
+              Попробовать снова →
+            </button>
+          </section>
+        ) : (
+          <section className="cars">
+            {cars
+              .slice(0, 3)
+              .map(
+                (
                   car,
-                )
+                  index,
+                ) => {
+                  const saved =
+                    savedIds.has(
+                      car.id,
+                    )
 
-              return (
-                <article
-                  className="car-card"
-                  key={
-                    car.id
-                  }
-                >
-                  <div className="car-photo">
-                    {img ? (
-                      <img
-                        src={
-                          img
-                        }
-                        alt={
-                          car.name
-                        }
-                        onError={(
-                          e,
-                        ) => {
-                          e.currentTarget.style.display =
-                            'none'
-                        }}
-                      />
-                    ) : (
-                      <div className="car-placeholder">
-                        <span>
-                          AUREN
-                        </span>
-
-                        <strong>
-                          {
-                            car.name
-                          }
-                        </strong>
-
-                        <small>
-                          Фото
-                          источника
-                          недоступно
-                        </small>
-                      </div>
-                    )}
-
-                    <div className="photo-gradient" />
-
-                    <span className="rank">
-                      0
-                      {index +
-                        1}
-                    </span>
-
-                    {car.hasRealListing && (
-                      <span className="real-badge">
-                        REAL LISTING
-                      </span>
-                    )}
-
-                    <button
-                      className={`save-btn ${
-                        saved
-                          ? 'saved'
-                          : ''
-                      }`}
-                      onClick={() =>
-                        toggleSaved(
-                          car,
-                        )
+                  return (
+                    <article
+                      className="car"
+                      key={
+                        car.id
                       }
                     >
-                      {saved
-                        ? '♥'
-                        : '♡'}
-                    </button>
-                  </div>
+                      <div className="car-image">
+                        {car.image ? (
+                          <img
+                            src={
+                              car.image
+                            }
+                            alt={
+                              car.name
+                            }
+                            onError={(
+                              event,
+                            ) => {
+                              event.currentTarget.style.display =
+                                'none'
+                            }}
+                          />
+                        ) : (
+                          <div className="no-image">
+                            <span>
+                              AUREN
+                            </span>
 
-                  <div className="car-content">
-                    <div className="card-kicker">
-                      TOP{' '}
-                      {index +
-                        1}
-                    </div>
+                            <strong>
+                              {
+                                car.name
+                              }
+                            </strong>
 
-                    <h2>
-                      {
-                        car.name
-                      }
-                    </h2>
+                            <small>
+                              Реальное фото
+                              источника
+                              недоступно
+                            </small>
+                          </div>
+                        )}
 
-                    <div className="price">
-                      {car.price ||
-                        'Цена не подтверждена'}
-                    </div>
+                        <div className="image-gradient" />
 
-                    <div className="chips">
-                      {car.year && (
-                        <span>
-                          {
-                            car.year
-                          }
-                        </span>
-                      )}
-
-                      {car.body && (
-                        <span>
-                          {
-                            car.body
-                          }
-                        </span>
-                      )}
-
-                      {car.power && (
-                        <span>
-                          {
-                            car.power
-                          }
-                        </span>
-                      )}
-
-                      {car.drive && (
-                        <span>
-                          {
-                            car.drive
-                          }
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="why-box">
-                      <span>
-                        ПОЧЕМУ ПОДХОДИТ
-                      </span>
-
-                      <p>
-                        {car.why ||
-                          'AUREN не получил достаточно данных для точного объяснения.'}
-                      </p>
-                    </div>
-
-                    <div className="pros-cons">
-                      <div>
-                        <span>
-                          ПЛЮСЫ
+                        <span className="rank">
+                          0
+                          {index +
+                            1}
                         </span>
 
-                        <p>
-                          {
-                            car.pros
-                          }
-                        </p>
-                      </div>
-
-                      <div>
-                        <span>
-                          МИНУСЫ
-                        </span>
-
-                        <p>
-                          {
-                            car.cons
-                          }
-                        </p>
-                      </div>
-                    </div>
-
-                    {car.problems && (
-                      <div className="info-box">
-                        <span>
-                          ТИПИЧНЫЕ ПРОБЛЕМЫ
-                        </span>
-
-                        <p>
-                          {
-                            car.problems
-                          }
-                        </p>
-                      </div>
-                    )}
-
-                    {car.check && (
-                      <div className="info-box">
-                        <span>
-                          ПЕРЕД ПОКУПКОЙ
-                        </span>
-
-                        <p>
-                          {car.check}
-                        </p>
-                      </div>
-                    )}
-
-                    {car.bestFor && (
-                      <div className="info-box">
-                        <span>
-                          КОМУ ПОДХОДИТ
-                        </span>
-
-                        <p>
-                          {
-                            car.bestFor
-                          }
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="card-buttons">
-                      {car.listingUrl ? (
-                        <a
-                          href={
-                            car.listingUrl
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="primary-btn full"
-                        >
-                          Открыть объявление
-                          <span>
-                            ↗
+                        {car.hasRealListing && (
+                          <span className="real">
+                            REAL LISTING
                           </span>
-                        </a>
-                      ) : (
+                        )}
+
                         <button
-                          className="primary-btn full"
+                          className={`save ${
+                            saved
+                              ? 'active'
+                              : ''
+                          }`}
                           onClick={() =>
-                            window.open(
-                              `https://www.google.com/search?q=${encodeURIComponent(
-                                `${car.name} купить Россия`,
-                              )}`,
-                              '_blank',
+                            toggleSaved(
+                              car,
                             )
                           }
                         >
-                          Найти объявления
-                          <span>
-                            ↗
-                          </span>
+                          {saved
+                            ? '♥'
+                            : '♡'}
                         </button>
-                      )}
+                      </div>
 
-                      {car.sourceUrl && (
-                        <a
-                          href={
-                            car.sourceUrl
+                      <div className="car-content">
+                        <small className="top-label">
+                          TOP{' '}
+                          {index +
+                            1}
+                        </small>
+
+                        <h2>
+                          {
+                            car.name
                           }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ghost-btn full"
-                        >
-                          Источник
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              )
-            },
-          )}
-        </section>
+                        </h2>
+
+                        <div className="car-price">
+                          {
+                            car.price ||
+                            'Цена не подтверждена'
+                          }
+                        </div>
+
+                        <div className="chips">
+                          {car.year && (
+                            <span>
+                              {
+                                car.year
+                              }
+                            </span>
+                          )}
+
+                          {car.body && (
+                            <span>
+                              {
+                                car.body
+                              }
+                            </span>
+                          )}
+
+                          {car.power && (
+                            <span>
+                              {
+                                car.power
+                              }
+                            </span>
+                          )}
+
+                          {car.drive && (
+                            <span>
+                              {
+                                car.drive
+                              }
+                            </span>
+                          )}
+
+                          {car.mileage && (
+                            <span>
+                              {
+                                car.mileage
+                              }
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="why">
+                          <span>
+                            ПОЧЕМУ ПОДХОДИТ
+                          </span>
+
+                          <p>
+                            {
+                              car.why
+                            }
+                          </p>
+                        </div>
+
+                        <div className="two-column">
+                          <div>
+                            <span>
+                              ПЛЮСЫ
+                            </span>
+
+                            <p>
+                              {
+                                car.pros
+                              }
+                            </p>
+                          </div>
+
+                          <div>
+                            <span>
+                              МИНУСЫ
+                            </span>
+
+                            <p>
+                              {
+                                car.cons
+                              }
+                            </p>
+                          </div>
+                        </div>
+
+                        {car.problems && (
+                          <div className="info">
+                            <span>
+                              ТИПИЧНЫЕ ПРОБЛЕМЫ
+                            </span>
+
+                            <p>
+                              {
+                                car.problems
+                              }
+                            </p>
+                          </div>
+                        )}
+
+                        {car.check && (
+                          <div className="info">
+                            <span>
+                              ЧТО ПРОВЕРИТЬ
+                            </span>
+
+                            <p>
+                              {
+                                car.check
+                              }
+                            </p>
+                          </div>
+                        )}
+
+                        {car.bestFor && (
+                          <div className="info">
+                            <span>
+                              КОМУ ПОДХОДИТ
+                            </span>
+
+                            <p>
+                              {
+                                car.bestFor
+                              }
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="car-buttons">
+                          {car.listingUrl ? (
+                            <a
+                              className="primary-button full"
+                              href={
+                                car.listingUrl
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Открыть объявление
+                              <span>
+                                ↗
+                              </span>
+                            </a>
+                          ) : (
+                            <button
+                              className="primary-button full"
+                              onClick={() =>
+                                window.open(
+                                  `https://www.google.com/search?q=${encodeURIComponent(
+                                    `${car.name} купить Россия`,
+                                  )}`,
+                                  '_blank',
+                                )
+                              }
+                            >
+                              Найти объявления
+                              <span>
+                                ↗
+                              </span>
+                            </button>
+                          )}
+
+                          {car.sourceUrl && (
+                            <a
+                              className="secondary-button full"
+                              href={
+                                car.sourceUrl
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Источник
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  )
+                },
+              )}
+          </section>
+        )}
 
         {marketNote && (
-          <section className="market-card">
+          <section className="market-note">
             <div>
-              <span className="eyebrow">
+              <div className="eyebrow">
                 MARKET NOTE
-              </span>
+              </div>
 
               <h2>
-                Что заметил
-                AUREN.
+                Что заметил AUREN.
               </h2>
             </div>
 
@@ -1489,10 +1534,10 @@ function App() {
         )}
 
         {important && (
-          <section className="important-card">
-            <span className="eyebrow">
+          <section className="important">
+            <div className="eyebrow">
               IMPORTANT
-            </span>
+            </div>
 
             <p>
               {important}
@@ -1502,38 +1547,35 @@ function App() {
 
         {sources.length >
           0 && (
-          <section className="sources-card">
+          <section className="sources">
             <div>
-              <span className="eyebrow">
+              <div className="eyebrow">
                 RESEARCH SOURCES
-              </span>
+              </div>
 
               <h2>
-                На что опирался
-                AUREN.
+                Источники
+                исследования.
               </h2>
             </div>
 
             <div className="source-list">
               {sources
-                .slice(
-                  0,
-                  8,
-                )
+                .slice(0, 8)
                 .map(
                   (
                     source,
                     index,
                   ) => (
                     <a
+                      key={
+                        source.url
+                      }
                       href={
                         source.url
                       }
                       target="_blank"
                       rel="noreferrer"
-                      key={
-                        source.url
-                      }
                     >
                       <span>
                         0
@@ -1558,45 +1600,37 @@ function App() {
           </section>
         )}
 
-        <section className="monetization-card">
+        <section className="next-level">
           <div>
-            <span className="eyebrow">
-              NEXT STEP
-            </span>
+            <div className="eyebrow">
+              AUREN NEXT
+            </div>
 
             <h2>
-              Хочешь,
-              чтобы AUREN
-              искал ещё лучше?
+              Следующий шаг —
+              <br />
+              проверить конкретное
+              <br />
+              объявление.
             </h2>
 
             <p>
-              Следующий уровень продукта —
-              конкретные объявления,
-              история цен, сравнение
-              вариантов и уведомления
-              о новых предложениях.
+              В следующей итерации сюда
+              подключим полноценную проверку
+              объявления, сравнение машин,
+              историю цены и мониторинг.
             </p>
           </div>
 
-          <div className="monetization-actions">
-            <button
-              className="primary-btn"
-              onClick={begin}
-            >
-              Новый подбор
-              <span>
-                →
-              </span>
-            </button>
-
-            <a
-              className="ghost-btn"
-              href="mailto:hello@auren-drive.ru"
-            >
-              Связаться
-            </a>
-          </div>
+          <button
+            className="primary-button"
+            onClick={reset}
+          >
+            Новый подбор
+            <span>
+              →
+            </span>
+          </button>
         </section>
       </main>
     </div>
